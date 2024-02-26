@@ -1,107 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sonic Pinwheel</title>
+    <link rel="stylesheet" href="./src/index.css" />
+  </head>
+  <body>
+    <div class="w-screen h-screen">
+      <div id="app" class="w-full h-full flex flex-col justify-center items-center align-middle m-auto">
+        <canvas id="pinwheelCanvas" width="400" height="400"></canvas>
+        <br>
+        <button id="start" type="button" class="outline-dashed p-2 disable">Start</button>
+      </div>
+    </div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Pinwheel</title>
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-    </style>
-</head>
-
-<body>
-    <canvas id="pinwheelCanvas" width="600" height="600" style="background-color: skyblue"></canvas>
-
-    <script>
-        const canvas = document.getElementById('pinwheelCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let rotation = 0;
-        let angularVelocity = 0.05;
-        let angularAcceleration = -0.0001; // Adjust the acceleration to control slowing down
-        const epsilon = 0.0001; // A small value to handle floating-point errors
-        let previousRotation = 0;
-        const numBlades = 6;
-        const twoPi = Math.PI * 2.0;
-        const bladeDivisions = (twoPi) / numBlades;
-        let bladeAngle = 0;
-
-
-        function drawPinwheel() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(rotation);
-
-            // Define colors for each blade
-            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
-
-            // Draw pinwheel with blades
-            for (let i = 0; i < numBlades; i++) {
-                // Draw blade
-                ctx.fillStyle = colors[i % colors.length];
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(50, 0);
-                ctx.lineTo(0, 150);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.rotate(Math.PI / (numBlades / 2)); // 60 degrees
-            }
-
-            ctx.restore(); // Restore the unrotated state
-
-            // Draw a fixed red circle at the center bottom
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2 + 150, 8, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function checkBladeCrossing() {
-            bladeAngle += rotation - previousRotation
-            if (bladeAngle > bladeDivisions) {
-                bladeAngle -= bladeDivisions;
-                console.log('Blade crossed');
-            }
-        }
-
-        function update() {
-            previousRotation = rotation;
-            angularVelocity += angularAcceleration;
-            // Prevent backward rotation
-            if (angularVelocity < epsilon) {
-                angularVelocity = 0;
-            }
-            rotation += angularVelocity;
-            if (rotation > twoPi) {
-                rotation -= twoPi;
-                previousRotation -= twoPi;
-            }
-
-            checkBladeCrossing();
-            drawPinwheel();
-            requestAnimationFrame(update);
-        }
-
-        // Close enough check for floating-point numbers
-        function equal(a, b) {
-            return Math.abs(a - b) < epsilon;
-        }
-
-        update();
-    </script>
-</body>
-
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
