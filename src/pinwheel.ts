@@ -1,11 +1,8 @@
-// import {
-//     colorDifference,
-//     colorHexToColor,
-//     getHexColor,
-//     tweenColor,
-// } from "./utils";
+import { theChuck } from "./host";
 
 const BG_COLOR = "#ABCDEF";
+const DECELERATE = .999;
+const DECELERATE2 = .998;
 
 export default class Pinwheel {
     private canvas: HTMLCanvasElement;
@@ -21,13 +18,14 @@ export default class Pinwheel {
     private bladeAngle: number;
     // private pulseBGColor: string = "#FFFFFF";
     private lastUpdateTime: number = 0;
+    private dt: number = 0;
+    public animationID: number = 0;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId)! as HTMLCanvasElement;
         this.ctx = this.canvas.getContext("2d")!;
         this.rotation = 0;
         this.angularVelocity = Math.PI;
-        // this.angularAcceleration = -.3;
         this.angularAcceleration = 0;
         this.epsilon = 0.0001;
         this.previousRotation = 0;
@@ -96,7 +94,8 @@ export default class Pinwheel {
         this.bladeAngle += this.rotation - this.previousRotation;
         if (this.bladeAngle > this.bladeDivisions) {
             this.bladeAngle -= this.bladeDivisions;
-            // console.log("Blade crossed");
+            theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
+            theChuck.broadcastEvent("BLADE_CROSSED");
         }
     }
 
@@ -104,34 +103,60 @@ export default class Pinwheel {
     //     this.pulseBGColor = "#987BAC";
     // }
 
+    private blowSpeed() {
+        theChuck.getInt("MIC_ACTIVE").then((active) => {
+            if (active === 0) {
+                theChuck.getFloat("MIC_MAG").then((mag) => {
+                    this.magToAngularVelocity(mag);
+                });
+            }
+        });
+    }
+
+    // Convert magnitude to angular velocity
+    // 0 = 0
+    // 1 = 4 PI
+    private magToAngularVelocity(mag: number) {
+        const newAcceleration = mag * 4 * Math.PI;
+        if (newAcceleration > 0 && this.angularVelocity < 4 * Math.PI) {
+            // this.angularAcceleration = (.95 * newAcceleration) + (.05 * this.angularAcceleration);
+            this.angularAcceleration = newAcceleration;
+            this.angularVelocity += this.angularAcceleration * this.dt;
+        } else {
+            if (this.angularVelocity > Math.PI) {
+                this.angularVelocity *= DECELERATE;
+            } else {
+                this.angularVelocity *= DECELERATE2;
+            }
+        }
+        // If below threshold, stop
+        if (this.angularVelocity < this.epsilon) {
+            this.angularVelocity = 0;
+        }
+    }
+
     private update() {
         // Time Delta
         const now = performance.now();
-        const dt = (now - this.lastUpdateTime) / 1000;
+        this.dt = (now - this.lastUpdateTime) / 1000;
         this.lastUpdateTime = now;
 
         // Rotation Update
         this.previousRotation = this.rotation;
-        this.angularVelocity += this.angularAcceleration * dt;
-        if (this.angularVelocity < this.epsilon) {
-            this.angularVelocity = 0;
-        }
-        this.rotation += this.angularVelocity * dt;
+        this.blowSpeed();
+        this.rotation += this.angularVelocity * this.dt;
         if (this.rotation > this.twoPi) {
             this.rotation -= this.twoPi;
             this.previousRotation -= this.twoPi;
         }
 
-        this.checkBladeCrossing();
         this.drawPinwheel();
-        requestAnimationFrame(() => this.update());
+        this.checkBladeCrossing();
+        this.animationID = requestAnimationFrame(() => this.update());
     }
 
-    // private equal(a: number, b: number) {
-    //     return Math.abs(a - b) < this.epsilon;
-    // }
-
-    public start() {
+    public async start() {
+        await theChuck;
         this.lastUpdateTime = performance.now();
         this.update();
     }

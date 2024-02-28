@@ -14,10 +14,19 @@ class Main {
         window.addEventListener("load", async () => {
             this.startButton.addEventListener("click", async () => {
                 await initChuck(this.startButton);
-                this.startButton.disabled = true;
                 await startChuck(this.startButton);
                 this.pinwheel.start();
+                this.startButton.disabled = true;
             });
+        });
+
+        // Pinwheel animation pause/resume
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                cancelAnimationFrame(this.pinwheel.animationID);
+            } else {
+                this.pinwheel.start();
+            }
         });
     }
 }

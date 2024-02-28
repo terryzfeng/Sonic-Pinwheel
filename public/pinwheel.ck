@@ -1,87 +1,25 @@
-global Event GLOBAL_TICK;
-global Clock clock;
-
-class MicTrack 
-{
-    20 => float THRESHOLD_DIFFERENCE;
-
-    float _dbfs;
-    float _threshold;
-    dur _period;
-
-    adc => Gain micInput;
-    micInput => Gain g => OnePole p => blackhole;
-    micInput => g; // square input
-    3 => g.op; // multiple
-    .99 => p.pole;
-
-    // default 
-    100::ms => _period;
-    -60 => _dbfs;
-    -40 => _threshold;
-
-    fun @construct(dur period) 
-    {
-        period => _period;
-    }
-
-    // Return magnitude of the mic input
-    fun float getMag() {
-        // clamp between 0 and 1
-        Math.min(1, Math.max(0, (_threshold - _dbfs) / _threshold)) => float mag;
-        return mag;
-    }
-
-    // Return the current dbfs
-    fun float getDBFS() {
-        return _dbfs;
-    }
-
-    // Return if over threshold
-    fun int active() {
-        return _dbfs > _threshold; 
-    }
-
-    fun void setThreshold(float threshold) 
-    {
-        threshold => _threshold;
-    }
-
-    fun void autoSetThreshold() {
-        .5::second => now;
-        if (_dbfs > -100) {
-            _dbfs + THRESHOLD_DIFFERENCE => _threshold;
-            // <<< "threshold", _threshold >>>;
-        }
-    }
-
-    // Start tracking mic gain
-    fun void start() {
-        while (true)
-        {
-            20 * Math.log10( Math.sqrt(p.last()) ) => _dbfs;
-            _period => now;
-        }
-    }
-
-    spork ~ start();
-    // spork ~ autoSetThreshold();
-}
-
+//---------------------------------------------------------
+// PINWHEEL PRISM
+//---------------------------------------------------------
 class Prism extends Chugraph
 {
-    ModalBar bar => LPF lpf => NRev rev => outlet;
+    ModalBar bar => BPF bpf => NRev rev => outlet;
     bar.controlChange( 16, 1 );
-    bar.controlChange( 1, 0);
+    bar.controlChange( 1, 1);
 
-    lpf.freq(5000);
-    rev.mix(0.09);
+    bpf.freq( 4000 );
+    bpf.Q( 2 );
+    rev.mix(0.5);
+
+    fun @construct(dur decay) 
+    {
+    }
 
     fun void noteOn(float gain) 
     {
-        Math.random2f( 40, 90 ) => float stickHardness;
-        Math.random2f( 20, 40 ) => float strikePosition;
-        Math.random2f( 0, 12 ) => float vibratoGain;
+        Math.random2f( 80, 90 ) => float stickHardness;
+        Math.random2f( 10, 30 ) => float strikePosition;
+        Math.random2f( 0, 2 ) => float vibratoGain;
         Math.random2f( 20, 50 ) => float vibratoFreq;
 
         bar.controlChange( 2, stickHardness );
@@ -108,6 +46,9 @@ class Prism extends Chugraph
     }
 }
 
+//---------------------------------------------------------
+// PINWHEEL VIBRAPHONE
+//---------------------------------------------------------
 class Vibraphone extends Chugraph
 {
     Gain master => outlet;
@@ -124,8 +65,16 @@ class Vibraphone extends Chugraph
     float _gain;
     float _tremolo_period;
     dur _tremolo_half; 
+
+    fun @construct() {
+        init(2.2::second);
+    }
+
+    fun @construct(dur decay) {
+        init(decay);
+    }
     
-    fun @construct() 
+    fun init(dur decay) 
     {
         220.0 => _freq;
         1 => _gain;
@@ -156,7 +105,7 @@ class Vibraphone extends Chugraph
         .05 => osc3.gain;
 
         // Env1
-        env1.set(0::ms, 2.2::second, .0, 0.8::second);
+        env1.set(0::ms, decay, .0, 0.8::second);
         
         // Env2
         env2.set(0::ms, .2::second, 0, .3::second);
@@ -233,74 +182,62 @@ class Vibraphone extends Chugraph
     }
 }
 
-// MAIN
-MicTrack micTrack;
-Prism prism => dac; // low ostinato
-Vibraphone vibe => NRev rev => dac; // pentatonic melody
-
-rev.mix(0.05);
-63 => int keyCenter;
-[0,7] @=> int progression[];
-[0,2,4,5,7,9,
-12+2,12+0,12+7,12+4,
-0,2,7,9] @=> int pentatonic[];
-
-prism.freq(Std.mtof(keyCenter));
-vibe.freq(Std.mtof(keyCenter));
-
-fun void blowSonicPinwheel() 
+//---------------------------------------------------------
+// PINWHEEL INSTRUMENT
+//---------------------------------------------------------
+public class Pinwheel
 {
-    float mag;
-    float active;
-    int index;
-    while (true) 
+    Prism prism(0.5::second) => dac; // background ostinato
+    Vibraphone vibe => NRev rev => dac; // pentatonic pinwheel
+    rev.mix(0.1);
+    
+
+    // Variables
+    63 => int keyCenter;
+    [ 4, 7, 2, 7, 4, 12+4 ] @=> int pentatonic[];
+
+    0 => int pentIndex;
+
+    // Set the key center
+    fun void setKeyCenter(int midi) 
     {
-        Math.fabs(Math.pow((micTrack.getMag()),1.0/4)) => mag;
-        micTrack.active() => active;
-
-        // If mic is active
-        if (active) {
-            pentatonic[index] + (keyCenter + 12*Math.random2(0,2)) => Std.mtof => prism.freq;
-            // <<< Std.ftom(vibe.freq()) >>>;
-            prism.noteOn(mag);
-
-            ((1.0 - mag) * 150)::ms => now;
-
-            index++;
-            if (index >= pentatonic.size()) 
-            {
-                0 => index;
-            }
-        }
-        // <<< micTrack.getDBFS() >>>;
-        125::ms => now;
-    }
-}
-spork ~ blowSonicPinwheel();
-
-0 => int index;
-
-Math.random2(2,6) => int cycle;
-
-
-while (true) 
-{
-    GLOBAL_TICK => now;
-    if (clock._tick_count % cycle == 0) 
-    {
-        vibe.noteOn(0.18);
-    }
-    if (maybe && maybe && clock._tick_count % cycle == 1) 
-    {
-        vibe.noteOn(0.16);
+        midi => keyCenter; 
+        vibe.freq(Std.mtof(midi));
     }
 
-    if (clock._tick_count % 16 == 0) 
+    fun void strike(float gain) 
     {
-        vibe.freq(Std.mtof(keyCenter + progression[index++]));
-        if (index >= progression.size()) 
+        vibe.freq(Std.mtof(keyCenter));
+        vibe.noteOn(gain);
+    }
+
+    fun void strike(float gain, float freq) 
+    {
+        vibe.freq(freq);
+        vibe.noteOn(gain);
+    }
+
+    // Trigger the pinwheel and cycle the index
+    // velocity is from 0-4pi
+    fun void blow(float velocity) 
+    {
+        // Trigger pinwheel
+        pentatonic[pentIndex] + (keyCenter + 12*Math.random2(0,2)) => Std.mtof => prism.freq;
+        prism.noteOn(velocityToGain(velocity));
+        // Update pentatonic index
+        pentIndex++;
+        if (pentIndex >= pentatonic.size()) 
         {
-            0 => index;
-        }
+            0 => pentIndex;
+        };
+        100::ms => now;
+        prism.noteOff();
+    }
+
+    fun float velocityToGain(float velocity) 
+    {
+        Math.sqrt(velocity / (4 * Math.PI)) => float gain;
+        gain * .3 + .4 => gain;
+        return gain / 2.0;
     }
 }

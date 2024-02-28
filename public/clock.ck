@@ -5,39 +5,48 @@ global int COUNT;
 
 public class Clock
 {
-    1.0 => float _period; // in seconds
+    4 => int _bps; // beats per second
+    60 => int _max_seconds; // max seconds of piece
 
-    0 => int _tick_count;
-    0 => int _second_count;
+    0 => int _beat; // current beat per second
+    0 => int _second; // current second of piece
+    0 => int _running; // is clock running
 
-    .25::second => dur _period_dur;
-    (1::second / _period_dur) $ int => int _ticks_per_second;
-    0 => int _running;
+    // calculate
+    1.0 / _bps => float _period; // in seconds
+    _period::second => dur _period_dur;
+
+    fun int getTick()
+    {
+        return _second * _bps + _beat;
+    }
+
+    fun int exactSecondIs(int currSecond)
+    {
+        return currSecond == _second && _beat == 0;
+    }
 
     fun void start() 
     {
         1 => _running;
-        COUNT => _tick_count;
-        COUNT => _second_count;
+        COUNT => _second;
         while (_running)
         {
+            // <<< _second, _beat >>>;
             GLOBAL_TICK.broadcast();
-            _tick_count++;
-            <<< _tick_count >>>;
-            if (_tick_count > 59)
-            {
-                0 => _tick_count;
-            }
-
-            if (_tick_count % _ticks_per_second == 0)
-            {
-                _second_count++;
-                if (_second_count > 59)
-                {
-                    0 => _second_count;
-                }
-            }
             _period_dur => now;
+            _beat++;
+            // wrap beat
+            if (_beat == _bps)
+            {
+                0 => _beat;
+                _second++;
+            }
+            // wrap second
+            if (_second == _max_seconds)
+            {
+                0 => _second;
+            }
         }
     }
     
@@ -50,11 +59,10 @@ public class Clock
 global Clock clock;
 
 // TRIGGERED FROM JS
-// while (COUNT < 0) { <<< "." >>>; 1::ms => now; }
+// while (COUNT < 0) { 10::ms => now; }
 // <<< COUNT >>>;
 START => now;
-spork~clock.start();
-1::week => now;
+clock.start();
 
 // // Monitoring
 // SinOsc osc => ADSR e => dac; // TODO

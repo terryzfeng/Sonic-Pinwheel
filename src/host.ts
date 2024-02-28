@@ -11,10 +11,11 @@ import { Chuck } from "webchuck";
 let theChuck: Chuck;
 let audioContext: AudioContext;
 
+export { theChuck };
 
 export async function initChuck(startButton: HTMLButtonElement) {
     startButton.innerText = "Loading...";
-    audioContext = new AudioContext();
+    startButton.disabled = true;
     // Create theChuck
     theChuck = await Chuck.init(
         [
@@ -23,30 +24,52 @@ export async function initChuck(startButton: HTMLButtonElement) {
                 virtualFilename: "clock.ck",
             },
             {
+                serverFilename: "./micTrack.ck",
+                virtualFilename: "micTrack.ck",
+            },
+            {
                 serverFilename: "./pinwheel.ck",
                 virtualFilename: "pinwheel.ck",
             },
+            {
+                serverFilename: "./main.ck",
+                virtualFilename: "main.ck",
+            },
         ],
-        audioContext,
+        undefined,
         2,
         "./src/",
     );
-    console.log(theChuck);
-    theChuck.connect(audioContext.destination);
-    audioContext.suspend();
+    // theChuck.connect(audioContext.destination);
+    audioContext = theChuck.context as AudioContext;
+
+    // Connect microphone
+    navigator.mediaDevices
+        .getUserMedia({
+            video: false,
+            audio: {
+                echoCancellation: false,
+                autoGainControl: false,
+                noiseSuppression: false,
+            },
+        })
+        .then((stream) => {
+            const adc = audioContext.createMediaStreamSource(stream);
+            adc.connect(theChuck);
+        });
 
     (window as any).theChuck = theChuck;
 
-    readyChuck(startButton);
+    // readyChuck(startButton);
 }
 
 /**
  * Called when theChuck is ready
  */
-export function readyChuck(startButton: HTMLButtonElement) {
-    startButton.innerText = "Start";
-    startButton.disabled = false;
-}
+// export function readyChuck(startButton: HTMLButtonElement) {
+//     startButton.innerText = "Start";
+//     startButton.disabled = false;
+// }
 
 /**
  * Start theChuck
@@ -55,37 +78,32 @@ export async function startChuck(
     startButton: HTMLButtonElement,
 ): Promise<void> {
     audioContext.resume();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await theChuck.runFile("micTrack.ck");
+    await theChuck.runFile("pinwheel.ck");
     theChuck.runFile("clock.ck");
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await syncSetBroadcast("COUNT", "START");
-    console.log("synced");
-    theChuck.runFile("pinwheel.ck");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const currentSecond = sync();
+    theChuck.setInt("COUNT", currentSecond);
+    theChuck.broadcastEvent("START");
 
-    startButton.innerHTML = "Running";
-}
+    await theChuck.runFile("main.ck");
 
-function syncSetBroadcast(variable: string, event: string) {
-    const callbackID = theChuck.nextDeferID();
-    theChuck.sendMessage("syncSetBroadcast", {
-        variable,
-        event,
-        callback: callbackID,
-    });
-    return theChuck.deferredPromises[callbackID].value() as Promise<number>;
+    startButton.innerHTML = "BLOW!";
 }
 
 /**
  * sync
  */
-// function sync() {
-//     let currentSecond = 0;
-//     // get current time
-//     let currentTime = new Date().getTime();
-//     while (currentTime % 1000 !== 0) {
-//         currentTime = new Date().getTime();
-//     }
-//     // Get the current second
-//     currentSecond = (currentTime % (60 * 1000)) / 1000;
+function sync() {
+    let currentSecond = 0;
+    // get current time
+    let currentTime = new Date().getTime();
+    while (currentTime % 1000 !== 0) {
+        currentTime = new Date().getTime();
+    }
+    // Get the current second
+    currentSecond = (currentTime % (60 * 1000)) / 1000;
 
-//     return currentSecond;
-// }
+    return currentSecond;
+}
