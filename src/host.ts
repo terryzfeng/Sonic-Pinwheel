@@ -7,6 +7,7 @@
 //--------------------------------------------
 
 import { Chuck } from "webchuck";
+import Settings from "./settings";
 
 let theChuck: Chuck;
 let audioContext: AudioContext;
@@ -28,8 +29,12 @@ export async function initChuck(startButton: HTMLButtonElement) {
                 virtualFilename: "micTrack.ck",
             },
             {
-                serverFilename: "./pinwheel.ck",
-                virtualFilename: "pinwheel.ck",
+                serverFilename: "./pinwheel0.ck",
+                virtualFilename: "pinwheel0.ck",
+            },
+            {
+                serverFilename: "./pinwheel1.ck",
+                virtualFilename: "pinwheel1.ck",
             },
             {
                 serverFilename: "./main.ck",
@@ -48,14 +53,15 @@ export async function initChuck(startButton: HTMLButtonElement) {
         .getUserMedia({
             video: false,
             audio: {
-                echoCancellation: false,
-                autoGainControl: false,
+                // echoCancellation: false,
+                // autoGainControl: false,
                 noiseSuppression: false,
             },
         })
         .then((stream) => {
             const adc = audioContext.createMediaStreamSource(stream);
-            adc.connect(theChuck);
+            const gain = audioContext.createGain();
+            adc.connect(gain).connect(theChuck);
         });
 
     (window as any).theChuck = theChuck;
@@ -79,14 +85,24 @@ export async function startChuck(
 ): Promise<void> {
     audioContext.resume();
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await theChuck.runFile("micTrack.ck");
-    await theChuck.runFile("pinwheel.ck");
-    theChuck.runFile("clock.ck");
+    await theChuck.runFile("clock.ck");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const currentSecond = sync();
     theChuck.setInt("COUNT", currentSecond);
     theChuck.broadcastEvent("START");
 
+    await theChuck.runFile("micTrack.ck");
+    switch (Settings.instIndex) {
+    case 0: 
+        await theChuck.runFile("pinwheel0.ck");
+        break;
+    
+    case 1: 
+        await theChuck.runFile("pinwheel1.ck");
+        break;
+    default: 
+        await theChuck.runFile("pinwheel1.ck");
+    }
     await theChuck.runFile("main.ck");
 
     startButton.innerHTML = "BLOW!";

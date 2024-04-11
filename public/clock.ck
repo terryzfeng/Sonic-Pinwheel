@@ -32,10 +32,11 @@ public class Clock
         COUNT => _second;
         while (_running)
         {
-            // <<< _second, _beat >>>;
+            <<< _second, " : ", _beat >>>;
             GLOBAL_TICK.broadcast();
             _period_dur => now;
             _beat++;
+
             // wrap beat
             if (_beat == _bps)
             {
@@ -43,10 +44,7 @@ public class Clock
                 _second++;
             }
             // wrap second
-            if (_second == _max_seconds)
-            {
-                0 => _second;
-            }
+            _second % _max_seconds => _second;
         }
     }
     

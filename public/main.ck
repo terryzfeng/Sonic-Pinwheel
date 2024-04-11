@@ -40,8 +40,10 @@ MIC_GAIN => micTrack.gain;
 Math.random2(CYCLE_MIN,CYCLE_MAX) => int cycle;
 // Init Pinwheel
 pinwheel.setKeyCenter(keyCenter);
-if (clock._second > clock._max_seconds / 2) 
-{
+// if between .25 and .5 or between .75 and 1
+// set to 1
+if (clock._second >= 15 && clock._second < 30 ||
+    clock._second >= 45 && clock._second < 60) {
     1 => ostinatoIndex;
 }
 
@@ -73,7 +75,6 @@ fun void pinwheelCrossing()
     while (true)
     {
         BLADE_CROSSED => now;
-        // <<< "Blade Crossed" >>>;
         spork ~ pinwheel.blow(PINWHEEL_VEL);
     }
 }
@@ -84,23 +85,23 @@ spork ~ pinwheelCrossing();
 while (true) 
 {
     GLOBAL_TICK => now;
-    // Ostinato
+    // // Ostinato
     if (clock.getTick() % cycle == 0) 
     {
-        pinwheel.strike(0.18);
+        pinwheel.strike(0.01);
     }
-    if (maybe && clock.getTick() % cycle == 1) 
-    {
-        pinwheel.strike(0.08, Std.mtof(keyCenter + 2));
-    }
+    // if (maybe && clock.getTick() % cycle == 1) 
+    // {
+    //     pinwheel.strike(0.04, Std.mtof(keyCenter + 2));
+    // }
 
-    if (clock._second % 4 == 0) {
-        // Update Ostinato Index
-        ostInc();
-        pinwheel.strike(0.1);
-    }
+    // if (clock._second % 4 == 0) {
+    //     // Update Ostinato Index
+    //     ostInc();
+    //     pinwheel.strike(0.01);
+    // }
 
-    // Update Ostinato every 15 seconds
+    // // Update Ostinato every 15 seconds
     if (clock.exactSecondIs(15) || clock.exactSecondIs(30) ||
         clock.exactSecondIs(45) || clock.exactSecondIs(0)) {
         // Update Ostinato Index

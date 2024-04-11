@@ -1,6 +1,7 @@
 import { theChuck } from "./host";
 
 const BG_COLOR = "#ABCDEF";
+const MIN_VELOCITY = 0.5;
 const DECELERATE = .999;
 const DECELERATE2 = .998;
 
@@ -10,7 +11,6 @@ export default class Pinwheel {
     private rotation: number;
     private angularVelocity: number;
     private angularAcceleration: number;
-    private epsilon: number;
     private previousRotation: number;
     private numBlades: number;
     private twoPi: number;
@@ -27,7 +27,6 @@ export default class Pinwheel {
         this.rotation = 0;
         this.angularVelocity = Math.PI;
         this.angularAcceleration = 0;
-        this.epsilon = 0.0001;
         this.previousRotation = 0;
         this.numBlades = 6;
         this.twoPi = Math.PI * 2.0;
@@ -120,7 +119,8 @@ export default class Pinwheel {
         const newAcceleration = mag * 4 * Math.PI;
         if (newAcceleration > 0 && this.angularVelocity < 4 * Math.PI) {
             // this.angularAcceleration = (.95 * newAcceleration) + (.05 * this.angularAcceleration);
-            this.angularAcceleration = newAcceleration;
+            // TODO: This is a hack to make the pinwheel more responsive
+            this.angularAcceleration = 2 + newAcceleration;
             this.angularVelocity += this.angularAcceleration * this.dt;
         } else {
             if (this.angularVelocity > Math.PI) {
@@ -129,9 +129,9 @@ export default class Pinwheel {
                 this.angularVelocity *= DECELERATE2;
             }
         }
-        // If below threshold, stop
-        if (this.angularVelocity < this.epsilon) {
-            this.angularVelocity = 0;
+        // Minimum speed
+        if (this.angularVelocity < MIN_VELOCITY) {
+            this.angularVelocity = MIN_VELOCITY;
         }
     }
 

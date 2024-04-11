@@ -1,50 +1,65 @@
 //---------------------------------------------------------
-// PINWHEEL PRISM
+// PINWHEEL pad
 //---------------------------------------------------------
-class Prism extends Chugraph
+
+class Pad extends Chugraph
 {
-    ModalBar bar => BPF bpf => NRev rev => outlet;
-    bar.controlChange( 16, 1 );
-    bar.controlChange( 1, 1);
+    [0, 2, 4, 5, 7, 9, 11] @=> int scale[];
+    3 => int NUM_VOICES;
+    SinOsc osc[NUM_VOICES];
+    float pitches[NUM_VOICES];
+    ADSR adsr => Gain g(1.0 / NUM_VOICES) => NRev rev => outlet;
+    rev.mix(0.2);
+    adsr.set(1::second, 1::second, 0, 1::second);
 
-    bpf.freq( 4000 );
-    bpf.Q( 2 );
-    rev.mix(0.5);
+    Noise noise => HPF lpf => adsr;
+    noise.gain(0.1);
 
-    fun @construct(dur decay) 
-    {
+    // default
+    osc[0].freq(220);
+    osc[1].freq(220 * 5 / 4);
+    osc[2].freq(220 * 3 / 2);
+
+    for (0 => int i; i < NUM_VOICES; ++i) {
+        osc[i] => adsr;
     }
 
     fun void noteOn(float gain) 
     {
-        Math.random2f( 80, 90 ) => float stickHardness;
-        Math.random2f( 10, 30 ) => float strikePosition;
-        Math.random2f( 0, 2 ) => float vibratoGain;
-        Math.random2f( 20, 50 ) => float vibratoFreq;
-
-        bar.controlChange( 2, stickHardness );
-        bar.controlChange( 4, strikePosition );
-        bar.controlChange( 11, vibratoGain );
-        bar.controlChange( 7, vibratoFreq );
-
-        gain => bar.noteOn;
+        osc[0].gain(gain / 2);
+        osc[1].gain(gain / 2);
+        osc[2].gain(gain / 2);
+        pitches[0] => Std.mtof => osc[0].freq;
+        Math.random2(-1, 1) * 12 + pitches[1] => Std.mtof => osc[1].freq;
+        Math.random2(-1, 1) * 12 + pitches[2] => Std.mtof => osc[2].freq;
+        adsr.keyOn();
+        lpf.freq(gain * 10000);
+        lpf.gain(gain);
     }
 
     fun void noteOff() 
     {
-        bar.noteOff;
+        adsr.keyOff();
     }
 
     fun void freq(float freq) 
     {
-        freq => bar.freq;
+        freq => Std.ftom => float root;
+        root => pitches[0];
+        scale[2] + root => pitches[1]; // 3rd
+        scale[4] + root => pitches[2]; // 5th
+
+        Std.mtof(pitches[0]) => osc[0].freq;
+        Std.mtof(pitches[1]) => osc[1].freq;
+        Std.mtof(pitches[2]) => osc[2].freq;
     }
 
     fun float freq() 
     {
-        return bar.freq();
+        return osc[0].freq();
     }
 }
+
 
 //---------------------------------------------------------
 // PINWHEEL VIBRAPHONE
@@ -183,14 +198,16 @@ class Vibraphone extends Chugraph
 }
 
 //---------------------------------------------------------
-// PINWHEEL INSTRUMENT
+// PINWHEEL 0 INSTRUMENT
 //---------------------------------------------------------
 public class Pinwheel
 {
-    Prism prism(0.5::second) => dac; // background ostinato
-    Vibraphone vibe => NRev rev => dac; // pentatonic pinwheel
+    Pad pad => NRev rev => dac; // background ostinato
+    Vibraphone vibe => NRev rev2 => dac; // pentatonic pinwheel
     rev.mix(0.1);
-    
+    rev2.mix(0.4);
+
+    4 * Math.PI => float MAX_VELOCITY;
 
     // Variables
     63 => int keyCenter;
@@ -218,26 +235,20 @@ public class Pinwheel
     }
 
     // Trigger the pinwheel and cycle the index
-    // velocity is from 0-4pi
     fun void blow(float velocity) 
     {
-        // Trigger pinwheel
-        pentatonic[pentIndex] + (keyCenter + 12*Math.random2(0,2)) => Std.mtof => prism.freq;
-        prism.noteOn(velocityToGain(velocity));
-        // Update pentatonic index
-        pentIndex++;
-        if (pentIndex >= pentatonic.size()) 
-        {
-            0 => pentIndex;
-        };
-        100::ms => now;
-        prism.noteOff();
+        if (velocity > MAX_VELOCITY / 8.0) {
+            // Trigger pinwheel
+            keyCenter => Std.mtof => pad.freq;
+            pad.noteOn(velocityToGain(velocity));
+            2::second => now;
+            pad.noteOff();
+        }
     }
 
     fun float velocityToGain(float velocity) 
     {
-        Math.sqrt(velocity / (4 * Math.PI)) => float gain;
-        gain * .3 + .4 => gain;
-        return gain / 2.0;
+        Math.sqrt(velocity / (MAX_VELOCITY)) => float gain;
+        return gain * .3;
     }
 }

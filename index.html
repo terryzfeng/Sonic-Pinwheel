@@ -10,9 +10,21 @@
   <body>
     <div class="w-screen h-screen">
       <div id="app" class="w-full h-full flex flex-col justify-center items-center align-middle m-auto">
-        <canvas id="pinwheelCanvas" width="400" height="400"></canvas>
+        <h1 class="text-xl pb-2">Select an instrument</h1>
+        <div class="flex align-middle">
+          <div class="items-center m-2">
+            <input type="radio" id="inst-0" name="instrument" class="m-1">
+            <label for="inst-0">Wind</label>
+          </div>
+          <div class="items-center m-2">
+            <input type="radio" id="inst-1" name="instrument" class="m-1" checked>
+            <label for="inst-1">Chimes</label>
+          </div>
+        </div>
         <br>
-        <button id="start" type="button" class="outline-dashed p-2 disable">Start</button>
+        <canvas id="pinwheelCanvas" width="400" height="400" class="transition z-50"></canvas>
+        <br>
+        <button id="start" type="button" class="outline-dashed py-2 px-4 canDisable text-xl">Start</button>
       </div>
     </div>
 

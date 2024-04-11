@@ -1,12 +1,15 @@
 import { initChuck, startChuck } from "./host";
 import Pinwheel from "./pinwheel";
+import Settings from "./settings";
 
 class Main {
     public startButton: HTMLButtonElement;
+    public settings: Settings;
     public pinwheel: Pinwheel;
 
     constructor() {
         this.startButton = document.querySelector<HTMLButtonElement>("#start")!;
+        this.settings = new Settings("pinwheelCanvas");
         this.pinwheel = new Pinwheel("pinwheelCanvas");
     }
 
@@ -17,6 +20,7 @@ class Main {
                 await startChuck(this.startButton);
                 this.pinwheel.start();
                 this.startButton.disabled = true;
+                Settings.disableButtons();
             });
         });
 
