@@ -45,6 +45,7 @@ pinwheel.setKeyCenter(keyCenter);
 if (clock._second >= 15 && clock._second < 30 ||
     clock._second >= 45 && clock._second < 60) {
     1 => ostinatoIndex;
+    pinwheel.setKeyCenter(keyCenter + ostinato[ostinatoIndex]);
 }
 
 //-------
@@ -105,6 +106,7 @@ while (true)
     if (clock.exactSecondIs(15) || clock.exactSecondIs(30) ||
         clock.exactSecondIs(45) || clock.exactSecondIs(0)) {
         // Update Ostinato Index
+        <<< "UPDATE OSTINATO" >>>;
         ostInc();
     }
 }

@@ -16,9 +16,14 @@
         "@typescript-eslint"
     ],
     "rules": {
+        // make typescript switch case indentation match the rest of the code
         "indent": [
             "error",
-            4
+            4,
+            {
+                "SwitchCase": 1
+            }
+
         ],
         "linebreak-style": [
             "error",

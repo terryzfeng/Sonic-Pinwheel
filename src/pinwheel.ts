@@ -2,8 +2,8 @@ import { theChuck } from "./host";
 
 const BG_COLOR = "#ABCDEF";
 const MIN_VELOCITY = 0.5;
-const DECELERATE = .999;
-const DECELERATE2 = .998;
+const DECELERATE = 0.999;
+const DECELERATE2 = 0.998;
 
 export default class Pinwheel {
     private canvas: HTMLCanvasElement;

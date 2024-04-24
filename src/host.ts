@@ -93,15 +93,17 @@ export async function startChuck(
 
     await theChuck.runFile("micTrack.ck");
     switch (Settings.instIndex) {
-    case 0: 
-        await theChuck.runFile("pinwheel0.ck");
-        break;
-    
-    case 1: 
-        await theChuck.runFile("pinwheel1.ck");
-        break;
-    default: 
-        await theChuck.runFile("pinwheel1.ck");
+        case 0: {
+            await theChuck.runFile("pinwheel0.ck");
+            break;
+        }
+        case 1: {
+            await theChuck.runFile("pinwheel1.ck");
+            break;
+        }
+        default: {
+            await theChuck.runFile("pinwheel1.ck");
+        }
     }
     await theChuck.runFile("main.ck");
 

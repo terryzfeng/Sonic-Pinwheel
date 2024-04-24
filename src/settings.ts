@@ -1,10 +1,6 @@
 const NUM_INSTRUCTIONS = 2;
 
-const BG_COLORS = [
-    "#ABEFCD",
-    "#ABCDEF",
-    "#CDEFAB",
-];
+const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDEFAB"];
 
 export default class Settings {
     public static instButtons: HTMLInputElement[];
@@ -16,7 +12,9 @@ export default class Settings {
             { length: NUM_INSTRUCTIONS },
             (_, i) => document.getElementById(`inst-${i}`) as HTMLInputElement,
         );
-        Settings.pinwheelCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
+        Settings.pinwheelCanvas = document.getElementById(
+            canvasId,
+        ) as HTMLCanvasElement;
 
         Settings.instButtons.forEach((button, index) => {
             button.addEventListener("change", () => {
