@@ -34,8 +34,6 @@ Pinwheel pinwheel;
 //-------
 // Initialize System
 //-------
-// Set Mic Gain
-MIC_GAIN => micTrack.gain; 
 // Set Ostinato Cycle
 Math.random2(CYCLE_MIN,CYCLE_MAX) => int cycle;
 // Init Pinwheel
@@ -55,9 +53,6 @@ fun void control()
 {
     while (true)
     {
-        // READ GLOBAL COMMUNICATION
-        MIC_GAIN => micTrack.gain;
-
         // WRITE GLOBAL COMMUNICATION
         micTrack.active() => MIC_ACTIVE;
         micTrack.getDBFS() => MIC_DBFS;

@@ -9,12 +9,15 @@
 import { Chuck } from "webchuck";
 import Settings from "./settings";
 import { cout } from "./utils/print";
+import { startVisualizer } from "./utils/visualizer";
 
 let theChuck: Chuck;
 let audioContext: AudioContext;
 let adc: MediaStreamAudioSourceNode;
-let compressor: DynamicsCompressorNode;
+// let compressor: DynamicsCompressorNode;
 let micGain: GainNode;
+
+let analyser: AnalyserNode;
 
 export { theChuck };
 
@@ -27,11 +30,15 @@ export async function initChuck(startButton: HTMLButtonElement) {
     audioContext.suspend();
     micGain = audioContext.createGain();
     micGain.gain.value = 1.0;
-    compressor = audioContext.createDynamicsCompressor();
-    compressor.threshold.value = -20;
-    compressor.ratio.value = 4;
-    compressor.attack.value = 0.003;
-    compressor.release.value = 0.25;
+    // compressor = audioContext.createDynamicsCompressor();
+    // compressor.threshold.value = -20;
+    // compressor.ratio.value = 1;
+    // compressor.attack.value = 0.003;
+    // compressor.release.value = 0.25;
+
+    // connect micGain to analyser
+    analyser = audioContext.createAnalyser();
+    micGain.connect(analyser);
 
     startButton.disabled = true;
     startButton.innerText = "Loading...";
@@ -54,6 +61,10 @@ export async function initChuck(startButton: HTMLButtonElement) {
             {
                 serverFilename: "./pinwheel1.ck",
                 virtualFilename: "pinwheel1.ck",
+            },
+            {
+                serverFilename: "./pinwheel2.ck",
+                virtualFilename: "pinwheel2.ck",
             },
             {
                 serverFilename: "./main.ck",
@@ -94,7 +105,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
         })
         .then((stream) => {
             adc = audioContext.createMediaStreamSource(stream);
-            adc.connect(compressor).connect(micGain).connect(theChuck);
+            adc.connect(micGain).connect(theChuck);
         });
 
     (window as any).theChuck = theChuck;
@@ -126,25 +137,14 @@ export async function startChuck(
     theChuck.broadcastEvent("START");
 
     await theChuck.runFile("micTrack.ck");
-    switch (Settings.instIndex) {
-        case 0: {
-            await theChuck.runFile("pinwheel0.ck");
-            break;
-        }
-        case 1: {
-            await theChuck.runFile("pinwheel1.ck");
-            break;
-        }
-        default: {
-            await theChuck.runFile("pinwheel1.ck");
-        }
-    }
+    await theChuck.runFile(`pinwheel${Settings.instIndex}.ck`);
     await theChuck.runFile("main.ck");
 
     startButton.innerHTML = "BLOW!";
 
     startInputMonitor();
     setupMicGainSlider();
+    startVisualizer(analyser);
 }
 
 /**
@@ -175,7 +175,7 @@ function startInputMonitor() {
  */
 function setupMicGainSlider() {
     const slider = document.getElementById("mic-gain") as HTMLInputElement;
-    slider.value = "100";
+    slider.value = "25";
     slider.oninput = () => {
         micGain.gain.value = (4 * parseFloat(slider.value)) / 100;
     };

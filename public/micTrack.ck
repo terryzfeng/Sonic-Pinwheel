@@ -18,11 +18,6 @@ public class MicTrack
     -60 => _dbfs;
     -20 => _threshold;
 
-    fun @construct(dur period) 
-    {
-        period => _period;
-    }
-
     // Return magnitude of the mic input
     fun float getMag() {
         // clamp between 0 and 1
@@ -44,12 +39,6 @@ public class MicTrack
     fun void setThreshold(float threshold) 
     {
         threshold => _threshold;
-    }
-
-    // Set mic gain
-    fun void gain(float gain) 
-    {
-        gain => micInput.gain;
     }
 
     // Start tracking mic gain

@@ -1,6 +1,6 @@
-const NUM_INSTRUCTIONS = 2;
+const NUM_INSTRUMENTS = 3;
 
-const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDEFAB"];
+const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDABEF"];
 
 export default class Settings {
     public static instButtons: HTMLInputElement[];
@@ -9,7 +9,7 @@ export default class Settings {
 
     constructor(canvasId: string) {
         Settings.instButtons = Array.from(
-            { length: NUM_INSTRUCTIONS },
+            { length: NUM_INSTRUMENTS },
             (_, i) => document.getElementById(`inst-${i}`) as HTMLInputElement,
         );
         Settings.pinwheelCanvas = document.getElementById(

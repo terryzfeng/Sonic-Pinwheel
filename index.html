@@ -20,10 +20,15 @@
             <input type="radio" id="inst-1" name="instrument" class="m-1" checked>
             <label for="inst-1">Chimes</label>
           </div>
+          <div class="items-center m-2">
+            <input type="radio" id="inst-2" name="instrument" class="m-1">
+            <label for="inst-2">Blade</label>
+          </div>
         </div>
         <br>
         <canvas id="pinwheelCanvas" width="400" height="400" class="transition z-50"></canvas>
         <div id="micMeter">
+          <canvas id="input-spectrum" width="400" height="40" class=""></canvas>
           <canvas id="input-meter" width="400" height="10" class="outline-red-300 bg-green-100"></canvas>
           <span id="dbfs"></span><br>
           <!-- horizontal mic slider, 400px wide/long -->
