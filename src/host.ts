@@ -8,15 +8,34 @@
 
 import { Chuck } from "webchuck";
 import Settings from "./settings";
+import { cout } from "./utils/print";
 
 let theChuck: Chuck;
 let audioContext: AudioContext;
+let adc: MediaStreamAudioSourceNode;
+let compressor: DynamicsCompressorNode;
+let micGain: GainNode;
 
 export { theChuck };
 
+/**
+ * Background initialization of theChuck
+ * @param startButton
+ */
 export async function initChuck(startButton: HTMLButtonElement) {
-    startButton.innerText = "Loading...";
+    audioContext = new AudioContext();
+    audioContext.suspend();
+    micGain = audioContext.createGain();
+    micGain.gain.value = 1.0;
+    compressor = audioContext.createDynamicsCompressor();
+    compressor.threshold.value = -20;
+    compressor.ratio.value = 4;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+
     startButton.disabled = true;
+    startButton.innerText = "Loading...";
+
     // Create theChuck
     theChuck = await Chuck.init(
         [
@@ -41,12 +60,27 @@ export async function initChuck(startButton: HTMLButtonElement) {
                 virtualFilename: "main.ck",
             },
         ],
-        undefined,
-        2,
+        audioContext,
+        audioContext.destination.maxChannelCount,
         "./src/",
     );
-    // theChuck.connect(audioContext.destination);
-    audioContext = theChuck.context as AudioContext;
+    theChuck.connect(audioContext.destination);
+
+    // Microphone setup
+    cout("Probing Microphones:", "green");
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+        devices.forEach(function (device) {
+            if (device.kind === "audioinput") {
+                cout(
+                    device.kind +
+                        ": " +
+                        device.label +
+                        " id = " +
+                        device.deviceId,
+                );
+            }
+        });
+    });
 
     // Connect microphone
     navigator.mediaDevices
@@ -54,28 +88,27 @@ export async function initChuck(startButton: HTMLButtonElement) {
             video: false,
             audio: {
                 // echoCancellation: false,
-                // autoGainControl: false,
+                autoGainControl: false,
                 noiseSuppression: false,
             },
         })
         .then((stream) => {
-            const adc = audioContext.createMediaStreamSource(stream);
-            const gain = audioContext.createGain();
-            adc.connect(gain).connect(theChuck);
+            adc = audioContext.createMediaStreamSource(stream);
+            adc.connect(compressor).connect(micGain).connect(theChuck);
         });
 
     (window as any).theChuck = theChuck;
 
-    // readyChuck(startButton);
+    readyChuck(startButton);
 }
 
 /**
  * Called when theChuck is ready
  */
-// export function readyChuck(startButton: HTMLButtonElement) {
-//     startButton.innerText = "Start";
-//     startButton.disabled = false;
-// }
+export function readyChuck(startButton: HTMLButtonElement) {
+    startButton.innerText = "Start";
+    startButton.disabled = false;
+}
 
 /**
  * Start theChuck
@@ -84,6 +117,7 @@ export async function startChuck(
     startButton: HTMLButtonElement,
 ): Promise<void> {
     audioContext.resume();
+    startButton.innerHTML = "Syncing...";
     await new Promise((resolve) => setTimeout(resolve, 500));
     await theChuck.runFile("clock.ck");
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -108,10 +142,47 @@ export async function startChuck(
     await theChuck.runFile("main.ck");
 
     startButton.innerHTML = "BLOW!";
+
+    startInputMonitor();
+    setupMicGainSlider();
 }
 
 /**
- * sync
+ * Monitor the input, display RMS
+ */
+function startInputMonitor() {
+    // draw a RMS meter in DBFS
+    const canvas = document.getElementById("input-meter") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d")!;
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+    setInterval(() => {
+        const db = document.getElementById("dbfs") as HTMLDivElement;
+        theChuck.getFloat("MIC_DBFS").then((dbfs) => {
+            // dbfs to log scale
+            db.innerHTML = dbfs.toFixed(2);
+            const scale = Math.pow(10, dbfs / 20);
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = `green`;
+            ctx.fillRect(0, 0, scale * WIDTH, HEIGHT);
+            // draw
+        });
+    }, 30);
+}
+
+/**
+ * Setup the mic gain slider
+ */
+function setupMicGainSlider() {
+    const slider = document.getElementById("mic-gain") as HTMLInputElement;
+    slider.value = "100";
+    slider.oninput = () => {
+        micGain.gain.value = (4 * parseFloat(slider.value)) / 100;
+    };
+}
+
+/**
+ * helper function to sync down to the second
  */
 function sync() {
     let currentSecond = 0;

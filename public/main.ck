@@ -87,10 +87,10 @@ while (true)
 {
     GLOBAL_TICK => now;
     // // Ostinato
-    if (clock.getTick() % cycle == 0) 
-    {
-        pinwheel.strike(0.01);
-    }
+    // if (clock.getTick() % cycle == 0) 
+    // {
+    //     pinwheel.strike(0.01);
+    // }
     // if (maybe && clock.getTick() % cycle == 1) 
     // {
     //     pinwheel.strike(0.04, Std.mtof(keyCenter + 2));

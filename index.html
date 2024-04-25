@@ -23,8 +23,18 @@
         </div>
         <br>
         <canvas id="pinwheelCanvas" width="400" height="400" class="transition z-50"></canvas>
+        <div id="micMeter">
+          <canvas id="input-meter" width="400" height="10" class="outline-red-300 bg-green-100"></canvas>
+          <span id="dbfs"></span><br>
+          <!-- horizontal mic slider, 400px wide/long -->
+          <input type="range" id="mic-gain" min="0" max="100" value="50" class="w-[400px]" />
+        </div>
         <br>
         <button id="start" type="button" class="outline-dashed py-2 px-4 canDisable text-xl">Start</button>
+        <br>
+        <div id="console" class="font-mono text-sm p-4 justify-start w-full h-48  overflow-auto bg-slate-50">
+          <b>console output:</b><br>
+        </div>
       </div>
     </div>
 

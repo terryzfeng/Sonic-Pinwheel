@@ -14,7 +14,7 @@ public class MicTrack
     .9 => p.pole;
 
     // default 
-    50::ms => _period;
+    20::ms => _period;
     -60 => _dbfs;
     -20 => _threshold;
 

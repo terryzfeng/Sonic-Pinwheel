@@ -32,7 +32,7 @@ public class Clock
         COUNT => _second;
         while (_running)
         {
-            <<< _second, " : ", _beat >>>;
+            // <<< _second, " : ", _beat >>>;
             GLOBAL_TICK.broadcast();
             _period_dur => now;
             _beat++;

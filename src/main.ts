@@ -15,11 +15,12 @@ class Main {
 
     init() {
         window.addEventListener("load", async () => {
+            await initChuck(this.startButton);
+
             this.startButton.addEventListener("click", async () => {
-                await initChuck(this.startButton);
+                this.startButton.disabled = true;
                 await startChuck(this.startButton);
                 this.pinwheel.start();
-                this.startButton.disabled = true;
                 Settings.disableButtons();
             });
         });
