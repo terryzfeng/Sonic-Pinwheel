@@ -1,22 +1,32 @@
 //---------------------------------------------------------
-// MICROPHONE TRACKING
+// title: MicTrack 
+// desc: Track microphone RMS and pitch
+// author: terry feng
 //---------------------------------------------------------
-public class MicTrack 
+
+public class MicTrack
 {
+    float _freq;
     float _dbfs;
     float _threshold;
-    dur _period;
 
-    adc => Gain micInput;
-    micInput => Gain g => OnePole p => blackhole;
-    micInput => g; // square input
-    3 => g.op; // multiple
-    .9 => p.pole;
+    512 => int WINDOW_SIZE;
+    // Blowing gain detection (RMS)
+    adc => HPF hpf => FFT fft =^ RMS rms => blackhole;
+    hpf.freq(5000); 
+    WINDOW_SIZE => fft.size;
+    Windowing.hann(WINDOW_SIZE) => fft.window;
 
-    // default 
-    20::ms => _period;
+    // Pitch detection
+    adc => LPF lpf => Flip flip =^ AutoCorr corr => blackhole;
+    lpf.freq(5000);
+    WINDOW_SIZE => flip.size;
+    true => corr.normalize;
+    second/samp => float sr;
+
+    440 => _freq;
     -60 => _dbfs;
-    -20 => _threshold;
+    -30 => _threshold;
 
     // Return magnitude of the mic input
     fun float getMag() {
@@ -35,18 +45,44 @@ public class MicTrack
         return _dbfs > _threshold; 
     }
 
+    // Return pitch track frequency
+    fun float getFreq() {
+        return _freq;
+    }
+
     // Set new threshold
     fun void setThreshold(float threshold) 
     {
         threshold => _threshold;
     }
 
-    // Start tracking mic gain
+    // START MICROPHONE TRACKING
     fun void start() {
+        UAnaBlob blob;
         while (true)
         {
-            20 * Math.log10( Math.sqrt(p.last()) ) => _dbfs;
-            _period => now;
+            // Get RMS
+            rms.upchuck() @=> blob;
+            blob.fval(0) => float rms;
+            20 * Math.log10(rms / .0025) => _dbfs;
+
+            // Get pitch
+            corr.upchuck();
+            // Ignore bins for notes that are too high
+            (sr/Std.mtof(90)) $ int => int maxBin;
+            float mag;
+            for ( maxBin => int bin; bin < corr.fvals().size()/2; ++bin) {
+                if (corr.fval(bin) > corr.fval(maxBin)) {
+                    bin => maxBin;
+                    corr.fval(bin) => mag;
+                }
+            }
+            if (mag > 0.5) {
+                // Update pitch if above correlation mag threshold
+                sr/maxBin => _freq;
+            }
+
+            WINDOW_SIZE::samp => now;
         }
     }
 

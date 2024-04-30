@@ -38,10 +38,10 @@ export default class Visualizer {
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d")!;
         this.waveformData = new Float32Array(
-            visualizerDefaultOptions.frameSize
+            visualizerDefaultOptions.frameSize,
         );
         this.frequencyData = new Float32Array(
-            visualizerDefaultOptions.frameSize / 2
+            visualizerDefaultOptions.frameSize / 2,
         );
     }
 
@@ -66,7 +66,7 @@ export default class Visualizer {
             const index = i % size;
             this.context2D.lineTo(
                 x,
-                (-this.waveformData[index] * 0.5 + 0.5) * height
+                (-this.waveformData[index] * 0.5 + 0.5) * height,
             );
         }
         this.context2D.strokeStyle = this.waveformColor;
@@ -84,12 +84,12 @@ export default class Visualizer {
             if (i === 0) {
                 this.context2D.moveTo(
                     x,
-                    freqHeightScale(this.frequencyData[i], height)
+                    freqHeightScale(this.frequencyData[i], height),
                 );
             } else {
                 this.context2D.lineTo(
                     x,
-                    freqHeightScale(this.frequencyData[i], height)
+                    freqHeightScale(this.frequencyData[i], height),
                 );
             }
         }
@@ -114,7 +114,7 @@ export default class Visualizer {
             0,
             0,
             this.context2D.canvas.width,
-            this.context2D.canvas.height
+            this.context2D.canvas.height,
         );
         const w = this.context2D.canvas.width;
         const h = this.context2D.canvas.height;

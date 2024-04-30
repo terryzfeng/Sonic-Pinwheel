@@ -17,6 +17,7 @@ global Event BLADE_CROSSED;
 global float MIC_ACTIVE;
 global float MIC_DBFS;
 global float MIC_MAG;
+global float MIC_FREQ;
 
 // Main UGens
 MicTrack micTrack;
@@ -57,6 +58,7 @@ fun void control()
         micTrack.active() => MIC_ACTIVE;
         micTrack.getDBFS() => MIC_DBFS;
         micTrack.getMag() => MIC_MAG;
+        micTrack.getFreq() => MIC_FREQ;
 
         50::ms => now;
     }

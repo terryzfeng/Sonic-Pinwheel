@@ -158,6 +158,7 @@ function startInputMonitor() {
     const HEIGHT = canvas.height;
     setInterval(() => {
         const db = document.getElementById("dbfs") as HTMLDivElement;
+        const freq = document.getElementById("freq") as HTMLDivElement;
         theChuck.getFloat("MIC_DBFS").then((dbfs) => {
             // dbfs to log scale
             db.innerHTML = dbfs.toFixed(2);
@@ -167,6 +168,11 @@ function startInputMonitor() {
             ctx.fillRect(0, 0, scale * WIDTH, HEIGHT);
             // draw
         });
+        theChuck.getFloat("MIC_FREQ").then((f) => {
+            // dbfs to log scale
+            freq.innerHTML = f.toFixed(2);
+        });
+
     }, 30);
 }
 
@@ -175,9 +181,9 @@ function startInputMonitor() {
  */
 function setupMicGainSlider() {
     const slider = document.getElementById("mic-gain") as HTMLInputElement;
-    slider.value = "25";
+    slider.value = "50";
     slider.oninput = () => {
-        micGain.gain.value = (4 * parseFloat(slider.value)) / 100;
+        micGain.gain.value = (2 * parseFloat(slider.value)) / 100;
     };
 }
 
