@@ -235,7 +235,7 @@ public class Pinwheel
     }
 
     // Trigger the pinwheel and cycle the index
-    fun void blow(float velocity, int bladeIndex) 
+    fun void blow(float velocity) 
     {
         if (velocity > MAX_VELOCITY / 8.0) {
             // Trigger pinwheel

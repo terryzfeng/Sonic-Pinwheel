@@ -12,7 +12,6 @@ global Clock clock;
 
 // Global Communication
 1.0 => global float MIC_GAIN;
-0 => global int PINWHEEL_BLADE;
 0.0 => global float PINWHEEL_VEL;
 global Event BLADE_CROSSED;
 global float MIC_ACTIVE;
@@ -74,7 +73,7 @@ fun void pinwheelCrossing()
     while (true)
     {
         BLADE_CROSSED => now;
-        spork ~ pinwheel.blow(PINWHEEL_VEL, PINWHEEL_BLADE);
+        spork ~ pinwheel.blow(PINWHEEL_VEL);
     }
 }
 spork ~ pinwheelCrossing();

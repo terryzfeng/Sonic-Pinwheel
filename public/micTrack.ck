@@ -26,7 +26,7 @@ public class MicTrack
 
     440 => _freq;
     -60 => _dbfs;
-    -30 => _threshold;
+    -40 => _threshold;
 
     // Return magnitude of the mic input
     fun float getMag() {

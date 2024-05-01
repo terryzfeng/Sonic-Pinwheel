@@ -6,6 +6,7 @@ const DECELERATE = 0.999;
 const DECELERATE2 = 0.998;
 
 export default class Pinwheel {
+    private currentBladeIndex: number = 0;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private rotation: number;
@@ -93,7 +94,10 @@ export default class Pinwheel {
         this.bladeAngle += this.rotation - this.previousRotation;
         if (this.bladeAngle > this.bladeDivisions) {
             this.bladeAngle -= this.bladeDivisions;
+            this.currentBladeIndex =
+                (this.currentBladeIndex + 1) % this.numBlades; // Add this line
             theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
+            theChuck.setInt("PINWHEEL_BLADE", this.currentBladeIndex);
             theChuck.broadcastEvent("BLADE_CROSSED");
         }
     }

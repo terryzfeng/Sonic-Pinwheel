@@ -162,7 +162,8 @@ function startInputMonitor() {
         theChuck.getFloat("MIC_DBFS").then((dbfs) => {
             // dbfs to log scale
             db.innerHTML = dbfs.toFixed(2);
-            const scale = Math.pow(10, dbfs / 20);
+            // -70 - -20 => 0 - 1
+            const scale = (dbfs + 70) / 60;
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = `green`;
             ctx.fillRect(0, 0, scale * WIDTH, HEIGHT);
@@ -172,7 +173,6 @@ function startInputMonitor() {
             // dbfs to log scale
             freq.innerHTML = f.toFixed(2);
         });
-
     }, 30);
 }
 

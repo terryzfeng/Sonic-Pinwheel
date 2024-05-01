@@ -268,7 +268,7 @@ public class Pinwheel
     }
 
     // Trigger the pinwheel and cycle the index
-    fun void blow(float velocity) 
+    fun void blow(float velocity, int bladeIndex) 
     {
         // Trigger pinwheel
         pentatonic[pentIndex] + (keyCenter + 12*Math.random2(0,2)) => Std.mtof => prism.freq;
