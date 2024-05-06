@@ -1,12 +1,18 @@
 import { theChuck } from "./host";
 
-const BG_COLOR = "#ABCDEF";
 const MIN_VELOCITY = 0.5;
 const DECELERATE = 0.999;
 const DECELERATE2 = 0.998;
 
+// Scaling
+const RATIO = window.devicePixelRatio || 1;
+const WIDTH = 400;
+const HEIGHT = 400;
+const bladeX = 50 * RATIO;
+const bladeY = 150 * RATIO;
+
 export default class Pinwheel {
-    private currentBladeIndex: number = 0;
+    private currentBladeIndex: number = -1;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private rotation: number;
@@ -17,10 +23,12 @@ export default class Pinwheel {
     private twoPi: number;
     private bladeDivisions: number;
     private bladeAngle: number;
-    // private pulseBGColor: string = "#FFFFFF";
     private lastUpdateTime: number = 0;
     private dt: number = 0;
+    private disabledBlades: Set<number> = new Set();
     public animationID: number = 0;
+    private width: number = WIDTH;
+    private height: number = HEIGHT;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId)! as HTMLCanvasElement;
@@ -34,20 +42,25 @@ export default class Pinwheel {
         this.bladeDivisions = this.twoPi / this.numBlades;
         this.bladeAngle = 0;
 
-        // Set canvas size
-        this.canvas.width = 400;
-        this.canvas.height = 400;
+        this.ctx.scale(RATIO, RATIO);
+        const stage = document.getElementById("stage")! as HTMLDivElement;
+        this.width = stage.clientWidth * RATIO;
+        this.height = stage.clientHeight * RATIO;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.canvas.style.width = stage.clientWidth + "px";
+        this.canvas.style.height = stage.clientHeight + "px";
 
-        // color the canvas white
-        this.canvas.style.backgroundColor = BG_COLOR;
+        this.disableBlade(1);
+        this.disableBlade(4);
 
         this.drawPinwheel();
     }
 
     private drawPinwheel() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.width, this.height);
         this.ctx.save();
-        this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
+        this.ctx.translate(this.width / 2, this.height / 2);
         this.ctx.rotate(this.rotation);
 
         const colors = [
@@ -60,14 +73,24 @@ export default class Pinwheel {
         ];
 
         for (let i = 0; i < this.numBlades; i++) {
-            this.ctx.fillStyle = colors[i % colors.length];
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, 0);
-            this.ctx.lineTo(50, 0);
-            this.ctx.lineTo(0, 150);
-            this.ctx.closePath();
-            this.ctx.fill();
-
+            if (this.disabledBlades.has(i)) {
+                this.ctx.strokeStyle = colors[i % colors.length];
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, 0);
+                this.ctx.lineTo(bladeX, 0);
+                this.ctx.lineTo(0, bladeY);
+                this.ctx.closePath();
+                this.ctx.lineWidth = 1 * RATIO;
+                this.ctx.stroke();
+            } else {
+                this.ctx.fillStyle = colors[i % colors.length];
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, 0);
+                this.ctx.lineTo(bladeX, 0);
+                this.ctx.lineTo(0, bladeY);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
             this.ctx.rotate(Math.PI / (this.numBlades / 2));
         }
 
@@ -77,9 +100,9 @@ export default class Pinwheel {
         this.ctx.fillStyle = "#ffffff";
         this.ctx.beginPath();
         this.ctx.arc(
-            this.canvas.width / 2,
-            this.canvas.height / 2 + 150,
-            8,
+            this.width / 2,
+            this.height / 2 + bladeY,
+            8 * RATIO,
             0,
             Math.PI * 2,
         );
@@ -96,16 +119,17 @@ export default class Pinwheel {
             this.bladeAngle -= this.bladeDivisions;
             this.currentBladeIndex =
                 (this.currentBladeIndex + 1) % this.numBlades; // Add this line
-            theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
-            theChuck.setInt("PINWHEEL_BLADE", this.currentBladeIndex);
-            theChuck.broadcastEvent("BLADE_CROSSED");
+            if (!this.disabledBlades.has(this.currentBladeIndex)) {
+                theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
+                theChuck.setInt("PINWHEEL_BLADE", this.currentBladeIndex);
+                theChuck.broadcastEvent("BLADE_CROSSED");
+            }
         }
     }
 
-    // private pulsateBackgroundOnce() {
-    //     this.pulseBGColor = "#987BAC";
-    // }
-
+    /**
+     * Blow speed based on microphone magnitude
+     */
     private blowSpeed() {
         theChuck.getInt("MIC_ACTIVE").then((active) => {
             if (active === 0) {
@@ -117,8 +141,7 @@ export default class Pinwheel {
     }
 
     // Convert magnitude to angular velocity
-    // 0 = 0
-    // 1 = 4 PI
+    // [0, 1] => [0, 4 PI]
     private magToAngularVelocity(mag: number) {
         const newAcceleration = mag * 4 * Math.PI;
         if (newAcceleration > 0 && this.angularVelocity < 4 * Math.PI) {
@@ -137,6 +160,14 @@ export default class Pinwheel {
         if (this.angularVelocity < MIN_VELOCITY) {
             this.angularVelocity = MIN_VELOCITY;
         }
+    }
+
+    public disableBlade(bladeIndex: number) {
+        this.disabledBlades.add(bladeIndex);
+    }
+
+    public enableBlade(bladeIndex: number) {
+        this.disabledBlades.delete(bladeIndex);
     }
 
     private update() {
@@ -165,3 +196,19 @@ export default class Pinwheel {
         this.update();
     }
 }
+
+// if (window.devicePixelRatio !== 1) {
+//     const c = document.getElementById("pinwheel-canvas")! as HTMLCanvasElement; // your canvas
+//     const w = c.width;
+//     const h = c.height;
+
+//     // scale the canvas by window.devicePixelRatio
+//     c.setAttribute("width", `${w * window.devicePixelRatio}`);
+//     c.setAttribute("height", `${h * window.devicePixelRatio}`);
+
+//     // use css to bring it back to regular size
+//     c.setAttribute("style", "width:" + w + "px; height:" + h + "px;");
+
+//     // set the scale of the context
+//     c.getContext("2d")!.scale(window.devicePixelRatio, window.devicePixelRatio);
+// }

@@ -6,6 +6,41 @@ body {
     font-family: "Gill Sans", sans-serif;
 }
 
+select {
+    -webkit-appearance: menulist-button;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #fff;
+    color: #000;
+}
+
+/* CANVAS */
+#stage {
+    width: 400px;
+    height: 400px;
+    position: relative;
+    /* border: 2px solid #000; */
+}
+#stage canvas {
+    position: absolute;
+}
+
+#ui-canvas {
+    z-index: 4;
+}
+#pinwheel-canvas {
+    z-index: 3;
+}
+#input-canvas {
+    z-index: 2;
+}
+#bg-canvas {
+    z-index: 1;
+}
+
+
 .canDisable {
     @apply disabled:opacity-50;
 }

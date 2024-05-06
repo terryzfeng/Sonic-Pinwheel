@@ -1,34 +1,33 @@
+import { rgbStringToHex, tweenColor} from "./colors";
+
 const MIN_DBFS: number = -120;
+// light theme
+const SPECTRUM_OUTLINE = "#ffffff";
+const SPECTRUM_COLOR = "#ffffff";
+const SPECTRUM_HEIGHT = 0.2;
 
 function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
 
+// Convert dbfs to height scale
 function freqHeightScale(dbfs: number, height: number): number {
     const value: number = clamp(dbfs, MIN_DBFS, 0); // -120 to 0
     const percent: number = value / MIN_DBFS; // 0.0 to 1.0
-    return percent * height; // 0.0 to height (downward)
+    return (percent * height) * SPECTRUM_HEIGHT + height * (1-SPECTRUM_HEIGHT); // 0.0 to height (downward)
 }
-
-// light theme
-const waveformColorLight = "#333";
-const spectrumColorLight = "#008000";
-const spectrumFillLight = "#dcfce7";
-
 export default class Visualizer {
     public analyserNode: AnalyserNode;
     public canvas: HTMLCanvasElement;
 
     private context2D: CanvasRenderingContext2D;
-    private readonly waveformData: Float32Array;
     private readonly frequencyData: Float32Array;
     private running: boolean = false;
 
-    private waveformColor: string = waveformColorLight;
-    private spectrumColor: string = spectrumColorLight;
-    private spectrumFill: string = spectrumFillLight;
+    private spectrumColor: string = SPECTRUM_COLOR;
+    private spectrumOutline: string = SPECTRUM_OUTLINE;
 
-    constructor(canvas: HTMLCanvasElement, analyserNode: AnalyserNode) {
+    constructor(canvas: HTMLCanvasElement, analyserNode: AnalyserNode, currBG: string) {
         const visualizerDefaultOptions = {
             frameSize: 2048,
             drawWaveform: true,
@@ -37,48 +36,20 @@ export default class Visualizer {
         this.analyserNode = analyserNode;
         this.canvas = canvas;
         this.context2D = canvas.getContext("2d")!;
-        this.waveformData = new Float32Array(
-            visualizerDefaultOptions.frameSize,
-        );
         this.frequencyData = new Float32Array(
             visualizerDefaultOptions.frameSize / 2,
         );
-    }
 
-    drawWaveform_(width: number, height: number) {
-        this.analyserNode.getFloatTimeDomainData(this.waveformData);
-        const size: number = this.waveformData.length;
-        // Draw twice the width to make the waveform more visible
-        const increment: number = (width * 2.0) / size;
-        this.context2D.beginPath();
-        // Find the first zero-crossing where the next value is positive
-        let i = 0;
-        while (
-            i < size - 1 &&
-            !(this.waveformData[i] < 0 && this.waveformData[i + 1] >= 0)
-        ) {
-            ++i;
-        }
-        // Start drawing from the first zero-crossing
-        for (let x = 0; x < width; x += increment, ++i) {
-            // Use modulo operator to wrap the index around to the start of the array
-            // Get weird artifacting at the wraparound
-            const index = i % size;
-            this.context2D.lineTo(
-                x,
-                (-this.waveformData[index] * 0.5 + 0.5) * height,
-            );
-        }
-        this.context2D.strokeStyle = this.waveformColor;
-        this.context2D.stroke();
+        const bgColor = rgbStringToHex(currBG);
+        console.log(bgColor);
+        this.spectrumOutline = tweenColor(SPECTRUM_OUTLINE, bgColor, 0.2);
+        this.spectrumColor = tweenColor(SPECTRUM_COLOR, bgColor, 0.4);
+        console.log(this.spectrumOutline, this.spectrumColor);
     }
 
     drawSpectrum_(width: number, height: number) {
         this.analyserNode.getFloatFrequencyData(this.frequencyData);
-        // get min max of frequency data
-        // We only visualize 0 to half of nyquist.
         const increment = width / (this.frequencyData.length / 2);
-        // |frequencyData| is clamped between 0.0dBFS ~ MIN_DBFS (-120)
         this.context2D.beginPath();
         for (let x = 0, i = 0; x < width; x += increment, ++i) {
             if (i === 0) {
@@ -96,10 +67,9 @@ export default class Visualizer {
         this.context2D.lineTo(width, height);
         this.context2D.lineTo(0, height);
         this.context2D.closePath();
-        this.context2D.fillStyle = this.spectrumFill;
+        this.context2D.fillStyle = this.spectrumColor;
         this.context2D.fill();
-        this.context2D.strokeStyle = this.spectrumColor;
-        // make line width only for spectrum
+        this.context2D.strokeStyle = this.spectrumOutline;
         this.context2D.lineWidth = 2;
         this.context2D.stroke();
         this.context2D.lineWidth = 1;
@@ -119,7 +89,6 @@ export default class Visualizer {
         const w = this.context2D.canvas.width;
         const h = this.context2D.canvas.height;
         this.drawSpectrum_(w, h);
-        this.drawWaveform_(w, h);
         requestAnimationFrame(this.drawVisualization_.bind(this));
     }
 
@@ -128,7 +97,6 @@ export default class Visualizer {
      */
     start() {
         this.running = true;
-        this.resize();
         this.drawVisualization_();
     }
 
@@ -149,8 +117,8 @@ export default class Visualizer {
 }
 
 export function startVisualizer(analyser: AnalyserNode) {
-    const cnv = document.getElementById("input-spectrum")! as HTMLCanvasElement;
-    console.log(cnv);
-    const visualizer = new Visualizer(cnv, analyser);
+    const cnv = document.getElementById("input-canvas")! as HTMLCanvasElement;
+    const currBG = (document.getElementById("bg-canvas") as HTMLElement).style.backgroundColor;
+    const visualizer = new Visualizer(cnv, analyser, currBG);
     visualizer.start();
 }

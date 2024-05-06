@@ -3,36 +3,32 @@ const NUM_INSTRUMENTS = 3;
 const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDABEF"];
 
 export default class Settings {
-    public static instButtons: HTMLInputElement[];
-    public static pinwheelCanvas: HTMLCanvasElement;
+    public static instDropdown: HTMLSelectElement;
+    public static bgCanvas: HTMLCanvasElement;
     public static instIndex: number = 1;
 
-    constructor(canvasId: string) {
-        Settings.instButtons = Array.from(
-            { length: NUM_INSTRUMENTS },
-            (_, i) => document.getElementById(`inst-${i}`) as HTMLInputElement,
-        );
-        Settings.pinwheelCanvas = document.getElementById(
-            canvasId,
-        ) as HTMLCanvasElement;
+    constructor(canvasId: string, dropdownId: string = "instruments") {
+        Settings.instDropdown = document.getElementById(dropdownId) as HTMLSelectElement;
+        Settings.bgCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
 
-        Settings.instButtons.forEach((button, index) => {
-            button.addEventListener("change", () => {
-                if (button.checked) {
-                    Settings.handleRadioButtonChange(index);
-                }
-            });
+        for (let i = 0; i < NUM_INSTRUMENTS; i++) {
+            const option = document.createElement("option");
+            option.value = i.toString();
+            option.text = `Instrument ${i}`;
+        }
+
+        Settings.instDropdown.addEventListener("change", () => {
+            const index = Settings.instDropdown.selectedIndex;
+            Settings.handleDropdownChange(index);
         });
     }
 
-    private static handleRadioButtonChange(index: number) {
-        Settings.pinwheelCanvas.style.backgroundColor = BG_COLORS[index];
+    private static handleDropdownChange(index: number) {
+        Settings.bgCanvas.style.backgroundColor = BG_COLORS[index];
         Settings.instIndex = index;
     }
 
-    public static disableButtons() {
-        Settings.instButtons.forEach((button) => {
-            button.disabled = true;
-        });
+    public static disableDropdown() {
+        Settings.instDropdown.disabled = true;
     }
 }

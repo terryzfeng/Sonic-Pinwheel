@@ -9,23 +9,12 @@ class Main {
 
     constructor() {
         this.startButton = document.querySelector<HTMLButtonElement>("#start")!;
-        this.settings = new Settings("pinwheelCanvas");
-        this.pinwheel = new Pinwheel("pinwheelCanvas");
+        this.pinwheel = new Pinwheel("pinwheel-canvas");
+        this.settings = new Settings("bg-canvas");
     }
 
     init() {
-        window.addEventListener("load", async () => {
-            await initChuck(this.startButton);
-
-            this.startButton.addEventListener("click", async () => {
-                this.startButton.disabled = true;
-                await startChuck(this.startButton);
-                this.pinwheel.start();
-                Settings.disableButtons();
-            });
-        });
-
-        // Pinwheel animation pause/resume
+        // animation pause/resume
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
                 cancelAnimationFrame(this.pinwheel.animationID);
@@ -33,6 +22,19 @@ class Main {
                 this.pinwheel.start();
             }
         });
+
+        window.addEventListener("load", async () => {
+            await initChuck(this.startButton);
+
+            // START button is clicked
+            this.startButton.addEventListener("click", async () => {
+                this.startButton.disabled = true;
+                await startChuck(this.startButton);
+                this.pinwheel.start();
+                Settings.disableDropdown();
+            });
+        });
+
     }
 }
 

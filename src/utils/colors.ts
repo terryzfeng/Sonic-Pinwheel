@@ -8,13 +8,21 @@ export interface Color {
 export function colorToHex(color: Color): string {
     return `#${color.r.toString(16)}${color.g.toString(16)}${color.b.toString(16)}`;
 }
-
 export function colorHexToColor(color: string): Color {
     const r = parseInt(color.slice(1, 3), 16);
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
 
     return { r, g, b, a: 1 };
+}
+
+export function rgbStringToHex(rgb: string): string {
+    const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (!match) {
+        throw new Error("Invalid RGB color");
+    }
+
+    return `#${parseInt(match[1], 10).toString(16)}${parseInt(match[2], 10).toString(16)}${parseInt(match[3], 10).toString(16)}`;
 }
 
 export function colorRGBStringToColor(color: string): Color {
