@@ -14,7 +14,6 @@ import { startVisualizer } from "./utils/visualizer";
 let theChuck: Chuck;
 let audioContext: AudioContext;
 let adc: MediaStreamAudioSourceNode;
-// let compressor: DynamicsCompressorNode;
 let micGain: GainNode;
 
 let analyser: AnalyserNode;
@@ -30,11 +29,6 @@ export async function initChuck(startButton: HTMLButtonElement) {
     audioContext.suspend();
     micGain = audioContext.createGain();
     micGain.gain.value = 1.0;
-    // compressor = audioContext.createDynamicsCompressor();
-    // compressor.threshold.value = -20;
-    // compressor.ratio.value = 1;
-    // compressor.attack.value = 0.003;
-    // compressor.release.value = 0.25;
 
     // connect micGain to analyser
     analyser = audioContext.createAnalyser();
@@ -162,12 +156,11 @@ function startInputMonitor() {
         theChuck.getFloat("MIC_DBFS").then((dbfs) => {
             // dbfs to log scale
             db.innerHTML = dbfs.toFixed(2);
-            // -70 - -20 => 0 - 1
+            // [-70, -20] => [0, 1]
             const scale = (dbfs + 70) / 60;
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = `green`;
             ctx.fillRect(0, 0, scale * WIDTH, HEIGHT);
-            // draw
         });
         theChuck.getFloat("MIC_FREQ").then((f) => {
             // dbfs to log scale
