@@ -20,6 +20,25 @@ let analyser: AnalyserNode;
 
 export { theChuck };
 
+// FILES TO LOAD INTO CHUCK
+const preloadFiles = [
+    "main.ck",
+    "clock.ck",
+    "micTrack.ck",
+    "pinwheel0.ck",
+    "pinwheel1.ck",
+    "pinwheel2.ck",
+    "pinwheel3.ck",
+    "pinwheel4.ck",
+];
+
+const filesToPreload = preloadFiles.map((f) => {
+    return {
+        serverFilename: `./${f}`,
+        virtualFilename: f,
+    };
+});
+
 /**
  * Background initialization of theChuck
  * @param startButton
@@ -39,32 +58,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
 
     // Create theChuck
     theChuck = await Chuck.init(
-        [
-            {
-                serverFilename: "./clock.ck",
-                virtualFilename: "clock.ck",
-            },
-            {
-                serverFilename: "./micTrack.ck",
-                virtualFilename: "micTrack.ck",
-            },
-            {
-                serverFilename: "./pinwheel0.ck",
-                virtualFilename: "pinwheel0.ck",
-            },
-            {
-                serverFilename: "./pinwheel1.ck",
-                virtualFilename: "pinwheel1.ck",
-            },
-            {
-                serverFilename: "./pinwheel2.ck",
-                virtualFilename: "pinwheel2.ck",
-            },
-            {
-                serverFilename: "./main.ck",
-                virtualFilename: "main.ck",
-            },
-        ],
+        filesToPreload,
         audioContext,
         audioContext.destination.maxChannelCount,
         "./src/",

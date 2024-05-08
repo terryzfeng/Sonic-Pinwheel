@@ -40,7 +40,6 @@ select {
     z-index: 1;
 }
 
-
 .canDisable {
     @apply disabled:opacity-50;
 }

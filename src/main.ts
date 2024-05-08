@@ -34,7 +34,6 @@ class Main {
                 Settings.disableDropdown();
             });
         });
-
     }
 }
 

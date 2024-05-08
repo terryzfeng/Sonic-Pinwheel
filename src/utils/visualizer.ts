@@ -1,4 +1,4 @@
-import { rgbStringToHex, tweenColor} from "./colors";
+import { rgbStringToHex, tweenColor } from "./colors";
 
 const MIN_DBFS: number = -90;
 // const SPECTRUM_OUTLINE = "#ffffff";
@@ -37,7 +37,11 @@ export default class Visualizer {
     private spectrumColor: string = SPECTRUM_COLOR;
     // private spectrumOutline: string = SPECTRUM_OUTLINE;
 
-    constructor(canvas: HTMLCanvasElement, analyserNode: AnalyserNode, currBG: string) {
+    constructor(
+        canvas: HTMLCanvasElement,
+        analyserNode: AnalyserNode,
+        currBG: string,
+    ) {
         const visualizerDefaultOptions = {
             frameSize: 2048,
             drawWaveform: true,
@@ -70,14 +74,14 @@ export default class Visualizer {
             // Normalize dbfs to [-120,0] => [0,1]
             bins[index] = Math.pow(dbfsToLinear(bins[index]), 2);
         });
-    
+
         for (let i = 0; i < NUM_BANDS; i++) {
-            const x = i * spacing - (2*spacing);
+            const x = i * spacing - 2 * spacing;
             const y = height;
-    
+
             const adjustedBin = Math.sqrt(bins[i]);
             const cloudSize = 100 * adjustedBin; // Adjust this factor to control cloud density
-    
+
             // draw a cloud-like shape
             this.context2D.beginPath();
             this.context2D.arc(x, y, cloudSize, 0, 2 * Math.PI);
@@ -85,8 +89,6 @@ export default class Visualizer {
             this.context2D.fill();
         }
     }
-    
-    
 
     /**
      * Draw waveform and spectrum
@@ -131,7 +133,8 @@ export default class Visualizer {
 
 export function startVisualizer(analyser: AnalyserNode) {
     const cnv = document.getElementById("input-canvas")! as HTMLCanvasElement;
-    const currBG = (document.getElementById("bg-canvas") as HTMLElement).style.backgroundColor;
+    const currBG = (document.getElementById("bg-canvas") as HTMLElement).style
+        .backgroundColor;
     const visualizer = new Visualizer(cnv, analyser, currBG);
     visualizer.start();
 }

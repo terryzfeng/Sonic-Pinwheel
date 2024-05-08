@@ -1,6 +1,6 @@
 const NUM_INSTRUMENTS = 3;
 
-const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDABEF"];
+const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDEFAB", "#CDABEF", "#EFABCD"];
 
 export default class Settings {
     public static instDropdown: HTMLSelectElement;
@@ -8,8 +8,12 @@ export default class Settings {
     public static instIndex: number = 1;
 
     constructor(canvasId: string, dropdownId: string = "instruments") {
-        Settings.instDropdown = document.getElementById(dropdownId) as HTMLSelectElement;
-        Settings.bgCanvas = document.getElementById(canvasId) as HTMLCanvasElement;
+        Settings.instDropdown = document.getElementById(
+            dropdownId,
+        ) as HTMLSelectElement;
+        Settings.bgCanvas = document.getElementById(
+            canvasId,
+        ) as HTMLCanvasElement;
 
         for (let i = 0; i < NUM_INSTRUMENTS; i++) {
             const option = document.createElement("option");
@@ -21,6 +25,10 @@ export default class Settings {
             const index = Settings.instDropdown.selectedIndex;
             Settings.handleDropdownChange(index);
         });
+
+        // Get the current selected index
+        const index = Settings.instDropdown.selectedIndex;
+        Settings.handleDropdownChange(index);
     }
 
     private static handleDropdownChange(index: number) {

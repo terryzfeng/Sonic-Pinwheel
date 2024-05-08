@@ -1,30 +1,27 @@
 //---------------------------------------------------------
 // PINWHEEL VIBRAPHONE
 //---------------------------------------------------------
-class Bamboo extends Chugraph
+class Shaker extends Chugraph
 {
-    Shakers shake => Dyno d => JCRev rev => outlet;
-    .001 => rev.mix;
+    Shakers shake => outlet;
+    shake => LPF lpf => JCRev rev => outlet;
+    lpf.freq(500);
+    .01 => rev.mix;
 
-    // Trickly kind of shaker
-    shake.which(22);
-
-    d.compress();
-    2000::ms => d.releaseTime;
-    0.2 => d.thresh;
-    0.33 => d.slopeAbove;
-    4 => d.gain;
+    shake.which(1);
+    shake.energy(.9);
 
     fun void noteOn(float gain) 
     {
-        Math.random2f(0,30) => shake.objects;
-        gain * 2 => shake.noteOn;
+        Math.random2f(0,128) => shake.objects;
+        gain * 2.3 => shake.noteOn;
     }
 
     fun void noteOff() { }
 
     fun void freq(float freq) 
     {
+        (freq $ int) % 2 * Math.random2(0,4) => shake.which;
         freq => shake.freq;
     }
 
@@ -35,11 +32,11 @@ class Bamboo extends Chugraph
 }
 
 //---------------------------------------------------------
-// PINWHEEL 2 INSTRUMENT
+// PINWHEEL 3 INSTRUMENT
 //---------------------------------------------------------
 public class Pinwheel
 {
-    Bamboo blade => JCRev rev => dac; // Blade Cross
+    Shaker blade => JCRev rev => dac; // Blade Cross
     rev.mix(0.01);
 
     4 * Math.PI => float MAX_VELOCITY;
@@ -53,7 +50,7 @@ public class Pinwheel
     // Set the key center
     fun void setKeyCenter(int midi) 
     {
-        midi - 24 => keyCenter; 
+        midi => keyCenter; 
     }
 
     // Trigger the pinwheel and cycle the index
