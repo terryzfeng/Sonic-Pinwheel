@@ -14,15 +14,6 @@ class Main {
     }
 
     init() {
-        // animation pause/resume
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                cancelAnimationFrame(this.pinwheel.animationID);
-            } else {
-                this.pinwheel.start();
-            }
-        });
-
         window.addEventListener("load", async () => {
             await initChuck(this.startButton);
 
@@ -31,6 +22,15 @@ class Main {
                 this.startButton.disabled = true;
                 await startChuck(this.startButton);
                 this.pinwheel.start();
+
+                // animation pause/resume
+                document.addEventListener("visibilitychange", () => {
+                    if (document.hidden) {
+                        cancelAnimationFrame(this.pinwheel.animationID);
+                    } else {
+                        this.pinwheel.start();
+                    }
+                });
                 Settings.disableDropdown();
             });
         });

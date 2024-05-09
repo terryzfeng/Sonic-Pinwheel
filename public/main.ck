@@ -15,6 +15,7 @@ global Clock clock;
 0 => global int PINWHEEL_BLADE;
 0.0 => global float PINWHEEL_VEL;
 global Event BLADE_CROSSED;
+global Event READY;
 global float MIC_ACTIVE;
 global float MIC_DBFS;
 global float MIC_MAG;
@@ -26,8 +27,8 @@ Pinwheel pinwheel;
 
 // Variables
 63 => int keyCenter;
-[ 0,7 ] @=> int ostinato[];
-0 => int ostinatoIndex;
+40 => int scoreSize;
+0 => int scoreIndex;
 
 // CONSTANTS
 3 => int CYCLE_MIN;
@@ -36,17 +37,16 @@ Pinwheel pinwheel;
 //-------
 // Initialize System
 //-------
+// Wait for clock to start
+READY => now;
 // Set Ostinato Cycle
 Math.random2(CYCLE_MIN,CYCLE_MAX) => int cycle;
 // Init Pinwheel
 pinwheel.setKeyCenter(keyCenter);
-// if between .25 and .5 or between .75 and 1
-// set to 1
-if (clock._second >= 15 && clock._second < 30 ||
-    clock._second >= 45 && clock._second < 60) {
-    1 => ostinatoIndex;
-    pinwheel.setKeyCenter(keyCenter + ostinato[ostinatoIndex]);
-}
+// Initial score position
+<<< "ChucK clock: ", clock.getTick() / 4 >>>;
+clock.getTick() / 36 => scoreIndex;
+<<< "Score position", scoreIndex >>>;
 
 //-------
 // JS COMMUNICATION/CONTROL
@@ -69,51 +69,40 @@ spork ~ control();
 //-------
 // PINWHEEL CONTROL
 //-------
+4 * Math.PI => float MAX_VELOCITY;
+fun float velocityToGain(float velocity) 
+{
+    Math.sqrt(velocity / (MAX_VELOCITY)) => float gain;
+    return gain * .3;
+}
 fun void pinwheelCrossing() 
 {
     while (true)
     {
         BLADE_CROSSED => now;
-        spork ~ pinwheel.blow(PINWHEEL_VEL, PINWHEEL_BLADE);
+        spork ~ pinwheel.blow(velocityToGain(PINWHEEL_VEL), PINWHEEL_BLADE);
     }
 }
 spork ~ pinwheelCrossing();
 
 
-// Main Loop
+//-------
+// MAIN LOOP
+//-------
 while (true) 
 {
     GLOBAL_TICK => now;
-    // // Ostinato
-    // if (clock.getTick() % cycle == 0) 
-    // {
-    //     pinwheel.strike(0.01);
-    // }
-    // if (maybe && clock.getTick() % cycle == 1) 
-    // {
-    //     pinwheel.strike(0.04, Std.mtof(keyCenter + 2));
-    // }
 
-    // if (clock._second % 4 == 0) {
-    //     // Update Ostinato Index
-    //     ostInc();
-    //     pinwheel.strike(0.01);
-    // }
-
-    // // Update Ostinato every 15 seconds
-    if (clock.exactSecondIs(15) || clock.exactSecondIs(30) ||
-        clock.exactSecondIs(45) || clock.exactSecondIs(0)) {
-        // Update Ostinato Index
-        <<< "UPDATE OSTINATO" >>>;
-        ostInc();
+    // // Update Ostinato every 15 * 4 beats = 60 ticks
+    if (clock.getTick() % 60 == 0) {
+        scoreInc();
     }
 }
 
-function ostInc() {
-    ostinatoIndex++;
-    if (ostinatoIndex >= ostinato.size()) 
-    {
-        0 => ostinatoIndex;
+function scoreInc() {
+    if (++scoreIndex >= scoreSize) {
+        0 => scoreIndex;
     }
-    pinwheel.setKeyCenter(keyCenter + ostinato[ostinatoIndex]);
+    <<< "scoreInc: ", scoreIndex >>>;
+    pinwheel.updateScore(scoreIndex);
 }

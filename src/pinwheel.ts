@@ -13,13 +13,17 @@ const bladeY = 150 * RATIO;
 
 export default class Pinwheel {
     private currentBladeIndex: number = -1;
+    private numBlades: number;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
+    private width: number = WIDTH;
+    private height: number = HEIGHT;
+
     private rotation: number;
+    private previousRotation: number;
     private angularVelocity: number;
     private angularAcceleration: number;
-    private previousRotation: number;
-    private numBlades: number;
+
     private twoPi: number;
     private bladeDivisions: number;
     private bladeAngle: number;
@@ -27,8 +31,7 @@ export default class Pinwheel {
     private dt: number = 0;
     private disabledBlades: Set<number> = new Set();
     public animationID: number = 0;
-    private width: number = WIDTH;
-    private height: number = HEIGHT;
+
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId)! as HTMLCanvasElement;
@@ -197,18 +200,3 @@ export default class Pinwheel {
     }
 }
 
-// if (window.devicePixelRatio !== 1) {
-//     const c = document.getElementById("pinwheel-canvas")! as HTMLCanvasElement; // your canvas
-//     const w = c.width;
-//     const h = c.height;
-
-//     // scale the canvas by window.devicePixelRatio
-//     c.setAttribute("width", `${w * window.devicePixelRatio}`);
-//     c.setAttribute("height", `${h * window.devicePixelRatio}`);
-
-//     // use css to bring it back to regular size
-//     c.setAttribute("style", "width:" + w + "px; height:" + h + "px;");
-
-//     // set the scale of the context
-//     c.getContext("2d")!.scale(window.devicePixelRatio, window.devicePixelRatio);
-// }

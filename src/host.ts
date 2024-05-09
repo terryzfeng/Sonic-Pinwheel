@@ -15,21 +15,22 @@ let theChuck: Chuck;
 let audioContext: AudioContext;
 let adc: MediaStreamAudioSourceNode;
 let micGain: GainNode;
-
 let analyser: AnalyserNode;
-
 export { theChuck };
+
+const PIECE_LENGTH = 6; // minutes
 
 // FILES TO LOAD INTO CHUCK
 const preloadFiles = [
     "main.ck",
     "clock.ck",
     "micTrack.ck",
-    "pinwheel0.ck",
-    "pinwheel1.ck",
-    "pinwheel2.ck",
-    "pinwheel3.ck",
-    "pinwheel4.ck",
+    "pinwheel-bass.ck",
+    "pinwheel-0.ck",
+    "pinwheel-1.ck",
+    "pinwheel-2.ck",
+    "pinwheel-3.ck",
+    "pinwheel-4.ck",
 ];
 
 const filesToPreload = preloadFiles.map((f) => {
@@ -61,7 +62,6 @@ export async function initChuck(startButton: HTMLButtonElement) {
         filesToPreload,
         audioContext,
         audioContext.destination.maxChannelCount,
-        "./src/",
     );
     theChuck.connect(audioContext.destination);
 
@@ -117,16 +117,18 @@ export async function startChuck(
 ): Promise<void> {
     audioContext.resume();
     startButton.innerHTML = "Syncing...";
-    await new Promise((resolve) => setTimeout(resolve, 500));
+
     await theChuck.runFile("clock.ck");
+    await theChuck.runFile("micTrack.ck");
+    await theChuck.runFile(`pinwheel-${Settings.instName}.ck`);
+    await theChuck.runFile("main.ck");
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    const currentSecond = sync();
+    const currentSecond = sync(PIECE_LENGTH); // Sync from a 6 minute time interval
+    console.log(`Starting at ${currentSecond} / ${PIECE_LENGTH * 60}`);
     theChuck.setInt("COUNT", currentSecond);
     theChuck.broadcastEvent("START");
 
-    await theChuck.runFile("micTrack.ck");
-    await theChuck.runFile(`pinwheel${Settings.instIndex}.ck`);
-    await theChuck.runFile("main.ck");
 
     startButton.innerHTML = "BLOW!";
 
@@ -147,18 +149,17 @@ function startInputMonitor() {
     setInterval(() => {
         const db = document.getElementById("dbfs") as HTMLDivElement;
         const freq = document.getElementById("freq") as HTMLDivElement;
-        theChuck.getFloat("MIC_DBFS").then((dbfs) => {
-            // dbfs to log scale
-            db.innerHTML = dbfs.toFixed(2);
-            // [-70, -20] => [0, 1]
-            const scale = (dbfs + 70) / 60;
+        theChuck.getFloat("MIC_MAG").then((mag) => {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = `green`;
-            ctx.fillRect(0, 0, scale * WIDTH, HEIGHT);
+            ctx.fillRect(0, 0, mag * WIDTH, HEIGHT);
         });
         theChuck.getFloat("MIC_FREQ").then((f) => {
             // dbfs to log scale
             freq.innerHTML = f.toFixed(2);
+        });
+        theChuck.getFloat("MIC_DBFS").then((dbfs) => {
+            db.innerHTML = dbfs.toFixed(2);
         });
     }, 30);
 }
@@ -175,9 +176,9 @@ function setupMicGainSlider() {
 }
 
 /**
- * helper function to sync down to the second
+ * helper function to get the current second of several minutes
  */
-function sync() {
+function sync(minutes: number) {
     let currentSecond = 0;
     // get current time
     let currentTime = new Date().getTime();
@@ -185,7 +186,7 @@ function sync() {
         currentTime = new Date().getTime();
     }
     // Get the current second
-    currentSecond = (currentTime % (60 * 1000)) / 1000;
+    currentSecond = (currentTime % (minutes * 60 * 1000)) / 1000;
 
     return currentSecond;
 }

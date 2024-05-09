@@ -1,12 +1,13 @@
 global Event GLOBAL_TICK;
 global Event START;
+global Event READY;
 global int COUNT;
 -1 => COUNT;
 
 public class Clock
 {
     4 => int _bps; // beats per second
-    60 => int _max_seconds; // max seconds of piece
+    360 => int _max_seconds; // max seconds of piece
 
     0 => int _beat; // current beat per second
     0 => int _second; // current second of piece
@@ -26,10 +27,10 @@ public class Clock
         return currSecond == _second && _beat == 0;
     }
 
-    fun void start() 
+    fun void start(int count) 
     {
         1 => _running;
-        COUNT => _second;
+        count => _second;
         while (_running)
         {
             // <<< _second, " : ", _beat >>>;
@@ -60,7 +61,10 @@ global Clock clock;
 // while (COUNT < 0) { 10::ms => now; }
 // <<< COUNT >>>;
 START => now;
-clock.start();
+spork ~ clock.start(COUNT);
+READY.broadcast();
+1::week => now;
+
 
 // // Monitoring
 // SinOsc osc => ADSR e => dac; // TODO

@@ -12,21 +12,20 @@ public class MicTrack
 
     512 => int WINDOW_SIZE;
     // Blowing gain detection (RMS)
-    adc => HPF hpf => FFT fft =^ RMS rms => blackhole;
-    hpf.freq(5000); 
+    adc => LPF lpf => FFT fft =^ RMS rms => blackhole;
+    lpf.freq(1000); 
     WINDOW_SIZE => fft.size;
     Windowing.hann(WINDOW_SIZE) => fft.window;
 
     // Pitch detection
-    adc => LPF lpf => Flip flip =^ AutoCorr corr => blackhole;
-    lpf.freq(5000);
+    adc => Flip flip =^ AutoCorr corr => blackhole;
     WINDOW_SIZE => flip.size;
     true => corr.normalize;
     second/samp => float sr;
 
     440 => _freq;
     -60 => _dbfs;
-    -40 => _threshold;
+    -20 => _threshold;
 
     // Return magnitude of the mic input
     fun float getMag() {

@@ -1,11 +1,13 @@
 const NUM_INSTRUMENTS = 3;
 
 const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDEFAB", "#CDABEF", "#EFABCD"];
+// e.g. pinwheel-bass.ck, pinwheel-0.ck, pinwheel-1.ck, ...
+const INST_NAMES = ["0", "1", "2", "bass", "3", "4"];
 
 export default class Settings {
     public static instDropdown: HTMLSelectElement;
     public static bgCanvas: HTMLCanvasElement;
-    public static instIndex: number = 1;
+    public static instName: string = INST_NAMES[0];
 
     constructor(canvasId: string, dropdownId: string = "instruments") {
         Settings.instDropdown = document.getElementById(
@@ -33,7 +35,7 @@ export default class Settings {
 
     private static handleDropdownChange(index: number) {
         Settings.bgCanvas.style.backgroundColor = BG_COLORS[index];
-        Settings.instIndex = index;
+        Settings.instName = INST_NAMES[index];
     }
 
     public static disableDropdown() {
