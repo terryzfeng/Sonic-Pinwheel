@@ -44,9 +44,8 @@ Math.random2(CYCLE_MIN,CYCLE_MAX) => int cycle;
 // Init Pinwheel
 pinwheel.setKeyCenter(keyCenter);
 // Initial score position
-<<< "ChucK clock: ", clock.getTick() / 4 >>>;
 clock.getTick() / 36 => scoreIndex;
-<<< "Score position", scoreIndex >>>;
+<<< "Pinwheel Score:" , scoreIndex, "(" + clock.getTick() / 4 + ")">>>;
 
 //-------
 // JS COMMUNICATION/CONTROL
@@ -93,7 +92,7 @@ while (true)
 {
     GLOBAL_TICK => now;
 
-    // // Update Ostinato every 15 * 4 beats = 60 ticks
+    // Advance Score every 15 seconds * 4 beats = 60 ticks
     if (clock.getTick() % 60 == 0) {
         scoreInc();
     }
@@ -103,6 +102,6 @@ function scoreInc() {
     if (++scoreIndex >= scoreSize) {
         0 => scoreIndex;
     }
-    <<< "scoreInc: ", scoreIndex >>>;
+    <<< "scoreInc:", scoreIndex >>>;
     pinwheel.updateScore(scoreIndex);
 }

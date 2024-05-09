@@ -54,6 +54,8 @@ public class Pinwheel
         midi => keyCenter; 
     }
 
+    fun void updateScore(int newIndex) {}
+
     // Trigger the pinwheel and cycle the index
     fun void blow(float velocity, int bladeIndex) 
     {

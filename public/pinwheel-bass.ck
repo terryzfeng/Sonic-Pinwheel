@@ -1,10 +1,11 @@
 //---------------------------------------------------------
-// Bass Pinwheel
+// Bass - Pinwheel
 //---------------------------------------------------------
 
 class Bass extends Chugraph
 {
     SawOsc osc => Gain g => ADSR adsr => LPF lpf => JCRev rev => outlet;
+    63 => int pitch;
 
     osc.gain(0.6);
     adsr.set(10::ms, 200::ms, 0, 0::ms);
@@ -13,7 +14,6 @@ class Bass extends Chugraph
     24 => int SUB;
     7 => int FIFTH;
 
-    63 => int pitch;
     lpf.freq(Std.mtof(pitch-17));
     lpf.Q(2);
     osc.freq(Std.mtof(pitch-24));
@@ -31,8 +31,8 @@ class Bass extends Chugraph
     fun void midi(int midiVal) 
     {
         midiVal => pitch;
-        osc.freq(Std.mtof(pitch-SUB));
-        lpf.freq(Std.mtof(pitch-SUB+FIFTH));
+        osc.freq(Std.mtof(pitchVal-SUB));
+        lpf.freq(Std.mtof(pitchVal-SUB+FIFTH));
     }
 
     fun void freq(float freq) 
@@ -58,10 +58,10 @@ public class Pinwheel
     63 => int keyCenter;
     keyCenter => int pitch;
     0 => int scoreIndex;
-
     [0, 2, 4, 5, 7, 9, 11, 12] @=> int major[];
 
     // BASS SCORE (40 NOTES)
+    // relative to key center
     [ 0, 0, 5, 5, 0, 0, 5, 5,
       0, 0, 4, 4, 0, 0, 5, 5,
       6, 6, 4, 4, 3, 3, 2, 2, 
@@ -79,13 +79,14 @@ public class Pinwheel
         keyCenter + score[scoreIndex] => pitch;
     }
 
-    // Trigger the pinwheel
+    // Trigger the pinwheel, play a bass note
     fun void blow(float gain, int bladeIndex) 
     {
-        // Update pitch
+        // Play the pitch
         // Occasionally + octave
         Math.random2f(0,1) > 0.9 ? pitch + 12 : pitch => int localPitch;
         bass.midi(localPitch);
+
         // Trigger pinwheel
         bass.noteOn(gain);
         500::second => now;

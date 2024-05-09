@@ -33,6 +33,7 @@ public class Clock
         count => _second;
         while (_running)
         {
+            // Monitor Clock
             // <<< _second, " : ", _beat >>>;
             GLOBAL_TICK.broadcast();
             _period_dur => now;
@@ -59,23 +60,8 @@ global Clock clock;
 
 // TRIGGERED FROM JS
 // while (COUNT < 0) { 10::ms => now; }
-// <<< COUNT >>>;
+
 START => now;
 spork ~ clock.start(COUNT);
 READY.broadcast();
 1::week => now;
-
-
-// // Monitoring
-// SinOsc osc => ADSR e => dac; // TODO
-// osc.freq(1000);
-// e.set(50::ms, 100::ms, 0, 100::ms); // TODO
-
-// // Keep alive
-// while (true)
-// {
-//     GLOBAL_TICK => now;
-//     e.keyOn();
-//     100::ms => now;
-//     e.keyOff();
-// }
