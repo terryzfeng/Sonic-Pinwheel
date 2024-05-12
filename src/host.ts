@@ -26,7 +26,7 @@ const preloadFiles = [
     "clock.ck",
     "micTrack.ck",
     "pinwheel-bass.ck",
-    "pinwheel-0.ck",
+    "pinwheel-wind.ck",
     "pinwheel-1.ck",
     "pinwheel-2.ck",
     "pinwheel-3.ck",
@@ -65,6 +65,21 @@ export async function initChuck(startButton: HTMLButtonElement) {
     );
     theChuck.connect(audioContext.destination);
 
+    // Connect microphone
+    navigator.mediaDevices
+        .getUserMedia({
+            video: false,
+            audio: {
+                // echoCancellation: false,
+                autoGainControl: false,
+                noiseSuppression: false,
+            },
+        })
+        .then((stream) => {
+            adc = audioContext.createMediaStreamSource(stream);
+            adc.connect(micGain).connect(theChuck);
+        });
+
     // Microphone setup
     cout("Probing Microphones:", "green");
     navigator.mediaDevices.enumerateDevices().then(function (devices) {
@@ -80,21 +95,6 @@ export async function initChuck(startButton: HTMLButtonElement) {
             }
         });
     });
-
-    // Connect microphone
-    navigator.mediaDevices
-        .getUserMedia({
-            video: false,
-            audio: {
-                // echoCancellation: false,
-                autoGainControl: false,
-                noiseSuppression: false,
-            },
-        })
-        .then((stream) => {
-            adc = audioContext.createMediaStreamSource(stream);
-            adc.connect(micGain).connect(theChuck);
-        });
 
     (window as any).theChuck = theChuck;
 
@@ -185,6 +185,7 @@ function sync(minutes: number) {
     while (currentTime % 1000 !== 0) {
         currentTime = new Date().getTime();
     }
+    console.log(`Current time: ${currentTime}`);
     // Get the current second
     currentSecond = (currentTime % (minutes * 60 * 1000)) / 1000;
 

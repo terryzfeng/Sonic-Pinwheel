@@ -59,8 +59,6 @@ public class Clock
 global Clock clock;
 
 // TRIGGERED FROM JS
-// while (COUNT < 0) { 10::ms => now; }
-
 START => now;
 spork ~ clock.start(COUNT);
 READY.broadcast();

@@ -1,8 +1,8 @@
 const NUM_INSTRUMENTS = 3;
 
 const BG_COLORS = ["#ABEFCD", "#ABCDEF", "#CDEFAB", "#CDABEF", "#EFABCD"];
-// e.g. pinwheel-bass.ck, pinwheel-0.ck, pinwheel-1.ck, ...
-const INST_NAMES = ["0", "1", "2", "bass", "3", "4"];
+// e.g. pinwheel-bass.ck, pinwheel-wind.ck, pinwheel-1.ck, ...
+const INST_NAMES = ["wind", "1", "2", "bass", "3", "4"];
 
 export default class Settings {
     public static instDropdown: HTMLSelectElement;

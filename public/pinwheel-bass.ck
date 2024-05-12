@@ -5,14 +5,20 @@
 class Bass extends Chugraph
 {
     SawOsc osc => Gain g => ADSR adsr => LPF lpf => JCRev rev => outlet;
+    SawOsc osc2 => adsr;
+    lpf => BPF bpf => outlet;
+    SinOsc lfo => blackhole;
     63 => int pitch;
+    bpf.Q(2);
 
-    osc.gain(0.6);
-    adsr.set(10::ms, 200::ms, 0, 0::ms);
+    osc.gain(0.4);
+    osc2.gain(0.4);
+    adsr.set(10::ms, 300::ms, 0, 0::ms);
     rev.mix(0.06);
 
     24 => int SUB;
     7 => int FIFTH;
+    12 => int OCTAVE;
 
     lpf.freq(Std.mtof(pitch-17));
     lpf.Q(2);
@@ -31,20 +37,30 @@ class Bass extends Chugraph
     fun void midi(int midiVal) 
     {
         midiVal => pitch;
-        osc.freq(Std.mtof(pitchVal-SUB));
-        lpf.freq(Std.mtof(pitchVal-SUB+FIFTH));
+        osc.freq(Std.mtof(midiVal-SUB));
+        osc2.freq(Std.mtof(midiVal-SUB-OCTAVE));
+        lpf.freq(Std.mtof(midiVal-SUB+OCTAVE));
     }
 
     fun void freq(float freq) 
     {
         osc.freq(freq);
-        lpf.freq(Std.mtof(Std.ftom(freq) + FIFTH));
+        osc2.freq(Std.mtof(Std.ftom(freq) - OCTAVE));
+        lpf.freq(Std.mtof(Std.ftom(freq) + OCTAVE));
     }
 
     fun float freq() 
     {
         return osc.freq();
     }
+
+    fun void updateLFO() {
+        while (true) {
+            200 + 50 * lfo.last() => bpf.freq;
+            50::ms => now;
+        }
+    }
+    spork ~ updateLFO();
 }
 
 //---------------------------------------------------------
@@ -60,13 +76,16 @@ public class Pinwheel
     0 => int scoreIndex;
     [0, 2, 4, 5, 7, 9, 11, 12] @=> int major[];
 
+    Math.random2(3,16) => int cycle;
+    0 => int count;
+
     // BASS SCORE (40 NOTES)
     // relative to key center
-    [ 0, 0, 5, 5, 0, 0, 5, 5,
-      0, 0, 4, 4, 0, 0, 5, 5,
-      6, 6, 4, 4, 3, 3, 2, 2, 
-      1, 1, 4, 4, 1, 1, 5, 5,
-      1, 2, 3, 4, 5, 6, 7, 8 ] @=> int score[];
+    [ 0, 0, 4, 4, 0, 0, 4, 4,
+      0, 0, 3, 3, 0, 0, 4, 4,
+      5, 5, 3, 3, 2, 2, 1, 1, 
+      0, 0, 3, 3, 0, 0, 4, 4,
+      0, 1, 2, 3, 4, 5, 6, 7 ] @=> int score[];
 
     // Set the key center
     fun void setKeyCenter(int midi) 
@@ -76,20 +95,28 @@ public class Pinwheel
 
     fun void updateScore(int newIndex) {
         newIndex => scoreIndex;
-        keyCenter + score[scoreIndex] => pitch;
+        keyCenter + major[score[scoreIndex]] => pitch;
+        // Change the cycle
+        Math.random2(3,16) => cycle;
     }
 
     // Trigger the pinwheel, play a bass note
     fun void blow(float gain, int bladeIndex) 
     {
         // Play the pitch
-        // Occasionally + octave
-        Math.random2f(0,1) > 0.9 ? pitch + 12 : pitch => int localPitch;
+        // +12 every cycle
+        count++;
+        pitch => int localPitch;
+        if (count > cycle) {
+            0 => count;
+            12 +=> localPitch;
+        }
         bass.midi(localPitch);
 
         // Trigger pinwheel
         bass.noteOn(gain);
-        500::second => now;
-        bass.noteOff();
+        // 5::second => now;
+        // bass.noteOff();
+
     }
 }

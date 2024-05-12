@@ -163,6 +163,7 @@ export default class Pinwheel {
         if (this.angularVelocity < MIN_VELOCITY) {
             this.angularVelocity = MIN_VELOCITY;
         }
+        this.angularVelocity = 5;
     }
 
     public disableBlade(bladeIndex: number) {

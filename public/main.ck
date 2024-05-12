@@ -31,21 +31,22 @@ Pinwheel pinwheel;
 0 => int scoreIndex;
 
 // CONSTANTS
-3 => int CYCLE_MIN;
-16 => int CYCLE_MAX;
+360 => int MAX_SECONDS;
+40 => int SCORE_LENGTH;
+MAX_SECONDS * 4 => int MAX_TICKS;
+MAX_SECONDS / SCORE_LENGTH => int SECONDS_PER_SCORE;
+MAX_TICKS / SCORE_LENGTH => int TICKS_PER_SCORE;
 
 //-------
 // Initialize System
 //-------
 // Wait for clock to start
 READY => now;
-// Set Ostinato Cycle
-Math.random2(CYCLE_MIN,CYCLE_MAX) => int cycle;
+// Initial score position (6 minutes broken in 40 chunks)
+clock.getTick() / TICKS_PER_SCORE => scoreIndex;
+<<< "Pinwheel Score:" , scoreIndex, "(" + clock.getTick() / 4 + ")">>>;
 // Init Pinwheel
 pinwheel.setKeyCenter(keyCenter);
-// Initial score position
-clock.getTick() / 36 => scoreIndex;
-<<< "Pinwheel Score:" , scoreIndex, "(" + clock.getTick() / 4 + ")">>>;
 
 //-------
 // JS COMMUNICATION/CONTROL
@@ -92,8 +93,8 @@ while (true)
 {
     GLOBAL_TICK => now;
 
-    // Advance Score every 15 seconds * 4 beats = 60 ticks
-    if (clock.getTick() % 60 == 0) {
+    // Advance Score every 9 seconds * 4 beats = 36 ticks
+    if (clock.getTick() % TICKS_PER_SCORE == 0) {
         scoreInc();
     }
 }
