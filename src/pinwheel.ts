@@ -12,26 +12,48 @@ const bladeX = 50 * RATIO;
 const bladeY = 150 * RATIO;
 
 export default class Pinwheel {
-    private currentBladeIndex: number = -1;
-    private numBlades: number;
+    // Canvas Properties
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private width: number = WIDTH;
     private height: number = HEIGHT;
 
+    // Blade Configuration
+    private numBlades: number;
+    private bladeDivisions: number;
+    private bladeAngle: number;
+    private twoPi: number;
+
+    // Rotation Properties
     private rotation: number;
     private previousRotation: number;
     private angularVelocity: number;
     private angularAcceleration: number;
 
-    private twoPi: number;
-    private bladeDivisions: number;
-    private bladeAngle: number;
+    // Timing Properties
     private lastUpdateTime: number = 0;
     private dt: number = 0;
+
+    // Blade Indexing
+    private currentBladeIndex: number = -1;
     private disabledBlades: Set<number> = new Set();
+
+    // Animation Properties
     public animationID: number = 0;
 
+    // Motion Control
+    public useConstantSpeed: boolean = false;
+    public constantSpeed: number = 5;
+
+    // Color Palette
+    public colors: string[] = [
+        "#3498db",
+        "#e74c3c",
+        "#2ecc71",
+        "#f39c12",
+        "#9b59b6",
+        "#1abc9c",
+    ];
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId)! as HTMLCanvasElement;
@@ -60,24 +82,14 @@ export default class Pinwheel {
         this.drawPinwheel();
     }
 
-    private drawPinwheel() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
+    private drawPinwheel(rotationOffset = 0) {
         this.ctx.save();
         this.ctx.translate(this.width / 2, this.height / 2);
-        this.ctx.rotate(this.rotation);
-
-        const colors = [
-            "#3498db",
-            "#e74c3c",
-            "#2ecc71",
-            "#f39c12",
-            "#9b59b6",
-            "#1abc9c",
-        ];
+        this.ctx.rotate(this.rotation + rotationOffset);
 
         for (let i = 0; i < this.numBlades; i++) {
             if (this.disabledBlades.has(i)) {
-                this.ctx.strokeStyle = colors[i % colors.length];
+                this.ctx.strokeStyle = this.colors[i % this.colors.length];
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, 0);
                 this.ctx.lineTo(bladeX, 0);
@@ -86,7 +98,7 @@ export default class Pinwheel {
                 this.ctx.lineWidth = 1 * RATIO;
                 this.ctx.stroke();
             } else {
-                this.ctx.fillStyle = colors[i % colors.length];
+                this.ctx.fillStyle = this.colors[i % this.colors.length];
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, 0);
                 this.ctx.lineTo(bladeX, 0);
@@ -98,6 +110,23 @@ export default class Pinwheel {
         }
 
         this.ctx.restore();
+    }
+
+    private draw() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
+        // Draw previous positions with transparency for motion blur effect
+        const blurFactor = 0.2; // Adjust the blur intensity as needed
+        const trailLength = 6; // Number of previous positions to draw
+        for (let i = 1; i <= trailLength; i++) {
+            const alpha = (1 - i / trailLength) * blurFactor;
+            this.ctx.save();
+            this.ctx.globalAlpha = alpha;
+            this.drawPinwheel(-i * this.angularVelocity * this.dt);
+            this.ctx.restore();
+        }
+
+        this.drawPinwheel();
 
         // Draw the ichtus circle
         this.ctx.fillStyle = "#ffffff";
@@ -163,7 +192,10 @@ export default class Pinwheel {
         if (this.angularVelocity < MIN_VELOCITY) {
             this.angularVelocity = MIN_VELOCITY;
         }
-        this.angularVelocity = 5;
+
+        if (this.useConstantSpeed) {
+            this.angularVelocity = this.constantSpeed;
+        }
     }
 
     public disableBlade(bladeIndex: number) {
@@ -172,6 +204,14 @@ export default class Pinwheel {
 
     public enableBlade(bladeIndex: number) {
         this.disabledBlades.delete(bladeIndex);
+    }
+
+    public setColors(colors: string[]) {
+        this.colors = colors;
+    }
+
+    public toggleConstantSpeed() {
+        this.useConstantSpeed = !this.useConstantSpeed;
     }
 
     private update() {
@@ -189,7 +229,7 @@ export default class Pinwheel {
             this.previousRotation -= this.twoPi;
         }
 
-        this.drawPinwheel();
+        this.draw();
         this.checkBladeCrossing();
         this.animationID = requestAnimationFrame(() => this.update());
     }
@@ -200,4 +240,3 @@ export default class Pinwheel {
         this.update();
     }
 }
-
