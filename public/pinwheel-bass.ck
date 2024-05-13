@@ -47,8 +47,8 @@ class Bass extends Chugraph
     {
         osc.freq(freq);
         osc2.freq(Std.mtof(Std.ftom(freq) - OCTAVE));
-        lpf.freq(Std.mtof(Std.ftom(freq) + OCTAVE));
-        bpf.freq(Std.mtof(Std.ftom(freq)));
+        lpf.freq(Std.mtof(Std.ftom(freq) + 2 * OCTAVE));
+        bpf.freq(Std.mtof(Std.ftom(freq) + 12));
     }
 
     fun float freq() 

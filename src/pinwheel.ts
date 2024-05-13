@@ -42,7 +42,7 @@ export default class Pinwheel {
     public animationID: number = 0;
 
     // Motion Control
-    public useConstantSpeed: boolean = true;
+    public useConstantSpeed: boolean = false;
     public constantSpeed: number = 5;
 
     // Color Palette
@@ -77,9 +77,9 @@ export default class Pinwheel {
         this.canvas.style.height = stage.clientHeight + "px";
 
         // this.disableBlade(1);
-        this.disableBlade(2);
-        this.disableBlade(0);
-        this.disableBlade(4);
+        // this.disableBlade(2);
+        // this.disableBlade(0);
+        // this.disableBlade(4);
 
         this.draw();
     }

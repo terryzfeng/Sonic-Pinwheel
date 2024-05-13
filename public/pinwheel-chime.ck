@@ -1,21 +1,35 @@
 class PingPong extends Chugraph {
     inlet => outlet;
-    inlet => DelayL dL => Gain fbL => outlet;
-    inlet => DelayL dR => Delay dR2 => Gain fbR => outlet;
+    inlet => DelayL dL => Gain fbL => GVerb gverbL => dac.chan(0);
+    inlet => DelayL dR => Delay dR2 => Gain fbR => GVerb gverbR => dac.chan(1);
     fbL => dL;
     fbR => dR;
+    fbL => outlet;
+    fbR => outlet;
     outlet.gain(0.9);
 
-    .25::second => dL.max => dL.delay;
-    .25::second => dR.max => dR.delay;
-    .25::second => dR2.max => dR2.delay;
+    .4::second => dL.max => dL.delay;
+    .4::second => dR.max => dR.delay;
+    .4::second => dR2.max => dR2.delay;
+
+    20 => gverbL.roomsize;
+    1.4::second => gverbL.revtime;
+    0.5 => gverbL.dry;
+    0.2 => gverbL.early;
+    0.3 => gverbL.tail;
+
+    20 => gverbR.roomsize;
+    1.6::second => gverbR.revtime;
+    0.5 => gverbR.dry;
+    0.2 => gverbR.early;
+    0.4 => gverbR.tail;
 
     // .64 => fbL.gain; // set feedback
-    .47 => dL.gain; // set effects mix
+    .25 => dL.gain; // set effects mix
 
     // .64 => fbR.gain; // set feedback
-    .47 => dR.gain; // set effects mix
-    .47 => dR2.gain; // set effects mix
+    .25 => dR.gain; // set effects mix
+    .25 => dR2.gain; // set effects mix
 }
 
 class Stick extends Chugraph
@@ -73,6 +87,8 @@ class Vibraphone extends Chugraph
     LPF lpf1; lpf1.set(220, 0); lpf1.gain(1); // not sure why gain is needed
     env1 => lpf1 => bus;
     env2 => lpf1 => bus;
+    env1.gain(0.5);
+    env2.gain(1.2);
     master.gain(0.6);
     
     // member variables
@@ -235,17 +251,19 @@ class Vibraphone extends Chugraph
 //---------------------------------------------------------
 public class Pinwheel
 {
-    Stick stick(0.5::second) => Gain g => GVerb gverb => dac;
-    Vibraphone vibe() => PingPong p => LPF lpf => HPF hpf => gverb;
-    lpf.freq(13000);
+    Stick stick(0.5::second) => GVerb gverb => dac;
+    Vibraphone vibe() => LPF lpf => HPF hpf => PingPong p => gverb;
+    lpf.freq(11000);
     hpf.freq(1000);
-    g.gain(0.8);
+    stick.gain(0.9);
+    vibe.gain(0.6);
 
-    20 => gverb.roomsize;
+
+    30 => gverb.roomsize;
     1.6::second => gverb.revtime;
-    0.4 => gverb.dry;
+    0.3 => gverb.dry;
     0.2 => gverb.early;
-    0.3 => gverb.tail;
+    0.6 => gverb.tail;
     
     // Variables
     63 => int keyCenter;
