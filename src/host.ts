@@ -27,10 +27,11 @@ const preloadFiles = [
     "micTrack.ck",
     "pinwheel-bass.ck",
     "pinwheel-wind.ck",
-    "pinwheel-1.ck",
+    "pinwheel-chime.ck",
     "pinwheel-2.ck",
     "pinwheel-3.ck",
     "pinwheel-4.ck",
+    "pinwheel-drift.ck",
 ];
 
 const filesToPreload = preloadFiles.map((f) => {
@@ -58,6 +59,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
     startButton.innerText = "Loading...";
 
     // Create theChuck
+    Chuck.loadChugin("chugins/GVerb.chug.wasm");
     theChuck = await Chuck.init(
         filesToPreload,
         audioContext,
@@ -185,7 +187,6 @@ function sync(minutes: number) {
     while (currentTime % 1000 !== 0) {
         currentTime = new Date().getTime();
     }
-    console.log(`Current time: ${currentTime}`);
     // Get the current second
     currentSecond = (currentTime % (minutes * 60 * 1000)) / 1000;
 

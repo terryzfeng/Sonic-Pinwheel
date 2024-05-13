@@ -77,7 +77,7 @@ public class Pinwheel
     [0, 2, 4, 5, 7, 9, 11, 12] @=> int major[];
 
     Math.random2(3,16) => int cycle;
-    0 => int count;
+    0 => int cycleIndex;
 
     // BASS SCORE (40 NOTES)
     // relative to key center
@@ -105,10 +105,10 @@ public class Pinwheel
     {
         // Play the pitch
         // +12 every cycle
-        count++;
+        cycleIndex++;
         pitch => int localPitch;
-        if (count > cycle) {
-            0 => count;
+        if (cycleIndex > cycle) {
+            0 => cycleIndex;
             12 +=> localPitch;
         }
         bass.midi(localPitch);

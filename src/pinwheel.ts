@@ -35,14 +35,14 @@ export default class Pinwheel {
     private dt: number = 0;
 
     // Blade Indexing
-    private currentBladeIndex: number = -1;
+    private currentBladeIndex: number = 5;
     private disabledBlades: Set<number> = new Set();
 
     // Animation Properties
     public animationID: number = 0;
 
     // Motion Control
-    public useConstantSpeed: boolean = false;
+    public useConstantSpeed: boolean = true;
     public constantSpeed: number = 5;
 
     // Color Palette
@@ -76,10 +76,11 @@ export default class Pinwheel {
         this.canvas.style.width = stage.clientWidth + "px";
         this.canvas.style.height = stage.clientHeight + "px";
 
-        this.disableBlade(1);
-        this.disableBlade(4);
+        // this.disableBlade(1);
+        this.disableBlade(2);
+        this.disableBlade(0);
 
-        this.drawPinwheel();
+        this.draw();
     }
 
     private drawPinwheel(rotationOffset = 0) {
@@ -116,8 +117,8 @@ export default class Pinwheel {
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         // Draw previous positions with transparency for motion blur effect
-        const blurFactor = 0.2; // Adjust the blur intensity as needed
-        const trailLength = 6; // Number of previous positions to draw
+        const blurFactor = 0.6; // Adjust the blur intensity as needed
+        const trailLength = 3; // Number of previous positions to draw
         for (let i = 1; i <= trailLength; i++) {
             const alpha = (1 - i / trailLength) * blurFactor;
             this.ctx.save();
@@ -149,12 +150,14 @@ export default class Pinwheel {
         this.bladeAngle += this.rotation - this.previousRotation;
         if (this.bladeAngle > this.bladeDivisions) {
             this.bladeAngle -= this.bladeDivisions;
-            this.currentBladeIndex =
-                (this.currentBladeIndex + 1) % this.numBlades; // Add this line
             if (!this.disabledBlades.has(this.currentBladeIndex)) {
                 theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
                 theChuck.setInt("PINWHEEL_BLADE", this.currentBladeIndex);
                 theChuck.broadcastEvent("BLADE_CROSSED");
+            }
+            this.currentBladeIndex--;
+            if (this.currentBladeIndex == -1) {
+                this.currentBladeIndex = this.numBlades - 1;
             }
         }
     }

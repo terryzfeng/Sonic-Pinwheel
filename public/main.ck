@@ -103,6 +103,6 @@ function scoreInc() {
     if (++scoreIndex >= scoreSize) {
         0 => scoreIndex;
     }
-    <<< "scoreInc:", scoreIndex >>>;
+    <<< "Score:", scoreIndex >>>;
     pinwheel.updateScore(scoreIndex);
 }
