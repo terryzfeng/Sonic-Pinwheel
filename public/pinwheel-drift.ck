@@ -39,7 +39,7 @@ class Drift extends Chugraph {
     control.chan(1) => outlet;
 
     // Inititialize
-    master.gain(3);
+    master.gain(3.2);
     for (0 => int i; i < NUM_VOICES; i++) {
         osc[i].gain(1.0/(4*NUM_VOICES));
         osc2[i].gain(1.0/(NUM_VOICES));

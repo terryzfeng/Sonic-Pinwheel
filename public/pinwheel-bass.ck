@@ -5,14 +5,14 @@
 class Bass extends Chugraph
 {
     SawOsc osc => Gain g => ADSR adsr => LPF lpf => JCRev rev => outlet;
-    SawOsc osc2 => adsr;
-    lpf => BPF bpf => outlet;
+    SawOsc osc2 => BPF bpf => adsr;
     SinOsc lfo => blackhole;
     63 => int pitch;
+    bpf.freq(100);
     bpf.Q(2);
 
     osc.gain(0.4);
-    osc2.gain(0.4);
+    osc2.gain(0.1);
     adsr.set(10::ms, 300::ms, 0, 0::ms);
     rev.mix(0.06);
 
@@ -40,6 +40,7 @@ class Bass extends Chugraph
         osc.freq(Std.mtof(midiVal-SUB));
         osc2.freq(Std.mtof(midiVal-SUB-OCTAVE));
         lpf.freq(Std.mtof(midiVal-SUB+OCTAVE));
+        bpf.freq(Std.mtof(midiVal-SUB+OCTAVE));
     }
 
     fun void freq(float freq) 
@@ -47,6 +48,7 @@ class Bass extends Chugraph
         osc.freq(freq);
         osc2.freq(Std.mtof(Std.ftom(freq) - OCTAVE));
         lpf.freq(Std.mtof(Std.ftom(freq) + OCTAVE));
+        bpf.freq(Std.mtof(Std.ftom(freq)));
     }
 
     fun float freq() 

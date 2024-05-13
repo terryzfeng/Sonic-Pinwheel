@@ -79,6 +79,7 @@ export default class Pinwheel {
         // this.disableBlade(1);
         this.disableBlade(2);
         this.disableBlade(0);
+        this.disableBlade(4);
 
         this.draw();
     }

@@ -120,10 +120,10 @@ class Vibraphone extends Chugraph
         .45 => osc3.gain;
 
         // Env1
-        env1.set(0::ms, decay, .0, 0.8::second);
+        env1.set(20::ms, decay, .0, 0.8::second);
         
         // Env2
-        env2.set(0::ms, .2::second, 0, .3::second);
+        env2.set(3::ms, .2::second, 0, .3::second);
         
         // Tremolo
         .2 => _tremolo_period;
@@ -197,6 +197,7 @@ class Vibraphone extends Chugraph
     }
 }
 
+// Simpler Vibraphone implementation
 // class Vibraphone extends Chugraph {
 //     SinOsc osc => ADSR env => Gain g => outlet;
 //     SinOsc osc2 => env;
@@ -220,7 +221,7 @@ class Vibraphone extends Chugraph
 //     }
 
 //     fun void freq(float freq) {
-//         freq => osc.freq;
+//         freq * 3 => osc.freq;
 //         freq * 5 => osc2.freq;
 //     }
 
@@ -235,7 +236,9 @@ class Vibraphone extends Chugraph
 public class Pinwheel
 {
     Stick stick(0.5::second) => Gain g => GVerb gverb => dac;
-    Vibraphone vibe() => PingPong p => gverb => dac;
+    Vibraphone vibe() => PingPong p => LPF lpf => HPF hpf => gverb;
+    lpf.freq(13000);
+    hpf.freq(1000);
     g.gain(0.8);
 
     20 => gverb.roomsize;
@@ -246,7 +249,7 @@ public class Pinwheel
     
     // Variables
     63 => int keyCenter;
-    [0, -1, 2, 0] @=> int pentatonic[];
+    [2, 0, 2, 4, -5, -1, 4, 7, 7, 7, 7, 5, 4, -15, -13, -12, 2, 2, 12, 7, 7, -8, -5, -1, -1, 7, 2, 2, 4, -5, 0] @=> int pentatonic[];
     
     0 => int pentIndex;
     
@@ -263,7 +266,7 @@ public class Pinwheel
     {
         // Trigger pinwheel
         pentatonic[pentIndex] + (keyCenter + 12) => Std.mtof => stick.freq;
-        pentatonic[pentIndex] + (keyCenter + 12) + 12 * Math.random2(0,1) => Std.mtof => vibe.freq;
+        pentatonic[pentIndex] + (keyCenter + 12) /*+ 12 * Math.random2(0,1)*/ => Std.mtof => vibe.freq;
 
         stick.noteOn(gain);
         vibe.noteOn(gain);
