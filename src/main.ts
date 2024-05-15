@@ -10,7 +10,7 @@ class Main {
     constructor() {
         this.startButton = document.querySelector<HTMLButtonElement>("#start")!;
         this.pinwheel = new Pinwheel("pinwheel-canvas");
-        this.settings = new Settings("bg-canvas");
+        this.settings = new Settings("bg-canvas", this.pinwheel);
     }
 
     init() {
@@ -32,6 +32,14 @@ class Main {
                     }
                 });
                 Settings.disableDropdown();
+            });
+
+            // Add keyboard shortcuts
+            // ctrl + enter or cmd + enter to start
+            document.addEventListener("keydown", (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                    this.startButton.click();
+                }
             });
         });
     }

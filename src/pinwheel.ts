@@ -204,10 +204,12 @@ export default class Pinwheel {
 
     public disableBlade(bladeIndex: number) {
         this.disabledBlades.add(bladeIndex);
+        this.draw();
     }
 
     public enableBlade(bladeIndex: number) {
         this.disabledBlades.delete(bladeIndex);
+        this.draw();
     }
 
     public setColors(colors: string[]) {

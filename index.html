@@ -8,13 +8,18 @@
     <link rel="stylesheet" href="./src/index.css" />
   </head>
   <body>
-    <div class="w-screen h-screen">
-      <div id="app" class="w-full flex flex-col justify-center items-center align-middle m-auto">
-        <h1 class="text-xl pb-2">Select an instrument</h1>
+    <div class="w-full">
+      <div id="app" class="w-full sm:w-3/4 xl:w-1/2 flex flex-col items-center m-auto">
 
-        <div class="flex align-middle">
-          <div class="items-center m-2">
-              <select id="instruments" class="m-1">
+        <header class="w-full h-20 flex justify-center items-center">
+          <h1 class="text-4xl text-center">Sonic Pinwheel</h1>
+        </header>
+
+        <!-- Instrument Select -->
+        <div id="instrumentSelect" class="mobile h-20 py-2 px-4 lg:px-0 flex justify-between align-middle items-center">
+          <h1 id="select-inst-prompt" class="text-lg pb-2 transition">Select an instrument</h1>
+          <div class="items-center px-1 py-1 border-2 border-gray-100 rounded-full enabled:hover:border-gray-200">
+              <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:opacity-75 enabled:hover:cursor-pointer disabled:opacity-50">
                   <option value="0">Wind</option>
                   <option value="1" selected>Chimes</option>
                   <option value="2">Bamboo</option>
@@ -23,9 +28,8 @@
                   <option value="5">Drift</option>
               </select>
           </div>
-      </div>
+        </div>
 
-        <br>
         <div id="stage" style="width: 400; height: 400;">
           <!-- <canvas id="ui-canvas" width="400" height="400" class=""></canvas> -->
           <canvas id="pinwheel-canvas" width="400" height="400" class=""></canvas>
@@ -33,17 +37,40 @@
           <canvas id="bg-canvas" width="400" height="400" class="transition" style="background-color: #ABCDEF;"></canvas>
         </div>
 
-        <div id="micMeter">
-          <canvas id="input-meter" width="400" height="10" class="outline-red-300 bg-green-100"></canvas>
-          <span id="freq" class="mr-2"></span> <span id="dbfs"></span><br>
-          <!-- horizontal mic slider, 400px wide/long -->
-          <input type="range" id="mic-gain" min="0" max="100" value="50" class="w-[400px]" />
+        <!-- Mic Monitoring -->
+        <canvas id="input-meter" width="400" height="10" class="outline-red-300 bg-green-100"></canvas>
+        <!-- Labels -->
+        <div class="mobile lg:px-0 flex justify-between font-mono text-md">
+          <span id="freq" class="mr-2">440.00 Hz</span>
+          <span id="dbfs">0.00 dB</span>
         </div>
+        <br> 
 
+        <!-- Blade Control-->
+        <div id="blade-buttons" class="mobile lg:px-0 flex justify-between">
+          <button id="blade6" class="blade-button"></button>
+          <button id="blade5" class="blade-button"></button>
+          <button id="blade4" class="blade-button"></button>
+          <button id="blade3" class="blade-button"></button>
+          <button id="blade2" class="blade-button"></button>
+          <button id="blade1" class="blade-button"></button>
+        </div>
         <br>
-        <button id="start" type="button" class="outline-dashed py-2 px-4 canDisable text-xl">Start</button>
+
+        <!-- Microphone Control-->
+        <div id="microphone-control" class="mobile lg:px-0 flex">
+            <img src="/img/mic.svg" class="w-9 h-9 inline-block pr-2 text-red-400"/>
+            <input type="range" id="mic-gain" min="0" max="100" value="50" class="w-full" />
+        </div>
         <br>
-        <div id="console" class="font-mono text-sm p-4 justify-start w-full h-48  overflow-auto bg-slate-50">
+
+        <!-- START -->
+        <button id="start" type="button" class="rounded-full border-2 border-sky-950 py-2 px-8 disabled:opacity-50 text-3xl">Start</button>
+        <br>
+        <br>
+        <br>
+
+        <div id="console" class="font-mono text-md p-4 justify-start w-full h-48 overflow-auto bg-slate-50">
           <b>console output:</b><br>
         </div>
       </div>

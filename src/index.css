@@ -1,9 +1,12 @@
+/* Puritan Google Font */
+@import url("https://fonts.googleapis.com/css2?family=Puritan:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-    font-family: "Gill Sans", sans-serif;
+    font-family: "Gill Sans", "Gill Sans MT", "Puritan", monospace;
 }
 
 select {
@@ -14,6 +17,18 @@ select {
     border: none;
     background-color: #fff;
     color: #000;
+}
+
+/* MOBILE UI */
+.mobile {
+    @apply w-full px-4 max-w-[400px]
+}
+
+/* if screen is larger than 400px */
+@media (min-width: 400px) {
+    .mobile {
+        @apply px-0
+    }
 }
 
 /* CANVAS */
@@ -40,8 +55,9 @@ select {
     z-index: 1;
 }
 
-.canDisable {
-    @apply disabled:opacity-50;
+/* BUTTONS */
+.blade-button {
+    @apply w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-4 transition;
 }
 
 .active {

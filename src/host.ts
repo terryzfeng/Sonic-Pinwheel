@@ -7,8 +7,8 @@
 //--------------------------------------------
 
 import { Chuck } from "webchuck";
-import Settings from "./settings";
 import { cout } from "./utils/print";
+import Settings from "./settings";
 import { startVisualizer } from "./utils/visualizer";
 
 let theChuck: Chuck;
@@ -83,7 +83,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
         });
 
     // Microphone setup
-    cout("Probing Microphones:", "green");
+    cout("Probing Microphones:", "green", false);
     navigator.mediaDevices.enumerateDevices().then(function (devices) {
         devices.forEach(function (device) {
             if (device.kind === "audioinput") {
@@ -93,6 +93,8 @@ export async function initChuck(startButton: HTMLButtonElement) {
                         device.label +
                         " id = " +
                         device.deviceId,
+                    undefined,
+                    false
                 );
             }
         });
@@ -131,7 +133,6 @@ export async function startChuck(
     theChuck.setInt("COUNT", currentSecond);
     theChuck.broadcastEvent("START");
 
-
     startButton.innerHTML = "BLOW!";
 
     startInputMonitor();
@@ -143,25 +144,29 @@ export async function startChuck(
  * Monitor the input, display RMS
  */
 function startInputMonitor() {
-    // draw a RMS meter in DBFS
+    // Draw RMS meter in DBFS to Canvas
     const canvas = document.getElementById("input-meter") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d")!;
     const WIDTH = canvas.width;
     const HEIGHT = canvas.height;
+
+    const freq = document.getElementById("freq") as HTMLSpanElement;
+    const db = document.getElementById("dbfs") as HTMLSpanElement;
+
     setInterval(() => {
-        const db = document.getElementById("dbfs") as HTMLDivElement;
-        const freq = document.getElementById("freq") as HTMLDivElement;
+        // Canvas Meter
         theChuck.getFloat("MIC_MAG").then((mag) => {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = `green`;
             ctx.fillRect(0, 0, mag * WIDTH, HEIGHT);
         });
+
+        // Monitor Mic
         theChuck.getFloat("MIC_FREQ").then((f) => {
-            // dbfs to log scale
-            freq.innerHTML = f.toFixed(2);
+            freq.innerHTML = `${f.toFixed(2)} Hz`;
         });
         theChuck.getFloat("MIC_DBFS").then((dbfs) => {
-            db.innerHTML = dbfs.toFixed(2);
+            db.innerHTML = `${dbfs.toFixed(2)} dB`;
         });
     }, 30);
 }
