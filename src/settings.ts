@@ -1,6 +1,7 @@
 import Pinwheel from "./pinwheel";
 
 const NUM_INSTRUMENTS = 3;
+const DROPDOWN_ID = "instruments";
 
 const BLADE_COLORS = [
     "#3498db",
@@ -19,8 +20,7 @@ export const BG_COLORS = [
     "#EFCDAB",
 ];
 // e.g. pinwheel-bass.ck, pinwheel-wind.ck, pinwheel-chime.ck, ...
-const INST_NAMES = ["wind", "chime", "2", "bass", "4", "drift"];
-const dropdownId = "instruments";
+const INST_NAMES = ["wind", "chime", "bamboo", "bass", "4", "drift"];
 
 export default class Settings {
     public static instDropdown: HTMLSelectElement;
@@ -39,7 +39,7 @@ export default class Settings {
 
     constructor(canvasId: string, pinwheel: Pinwheel) {
         Settings.instDropdown = document.getElementById(
-            dropdownId,
+            DROPDOWN_ID,
         ) as HTMLSelectElement;
         Settings.bgCanvas = document.getElementById(
             canvasId,
@@ -56,9 +56,13 @@ export default class Settings {
             Settings.handleDropdownChange(index);
         });
 
-        Settings.instDropdown.addEventListener("click", () => {
-            Settings.instDropdown.classList.remove("enabled:animate-pulse");
-        }, { once: true });
+        Settings.instDropdown.addEventListener(
+            "click",
+            () => {
+                Settings.instDropdown.classList.remove("enabled:animate-pulse");
+            },
+            { once: true },
+        );
 
         // Get the current selected index
         const index = Settings.instDropdown.selectedIndex;

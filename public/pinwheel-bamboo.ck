@@ -1,5 +1,7 @@
+global float MIC_FREQ;
+
 //---------------------------------------------------------
-// PINWHEEL VIBRAPHONE
+// Bamboo - Pinwheel
 //---------------------------------------------------------
 class Bamboo extends Chugraph
 {
@@ -13,15 +15,17 @@ class Bamboo extends Chugraph
     2000::ms => d.releaseTime;
     0.2 => d.thresh;
     0.33 => d.slopeAbove;
-    4 => d.gain;
+    8 => d.gain;
 
     fun void noteOn(float gain) 
     {
-        Math.random2f(0,30) => shake.objects;
+        1 => shake.objects;
         gain * 2 => shake.noteOn;
     }
 
-    fun void noteOff() { }
+    fun void noteOff() { 
+        shake.noteOff(.1);
+    }
 
     fun void freq(float freq) 
     {
@@ -35,48 +39,45 @@ class Bamboo extends Chugraph
 }
 
 //---------------------------------------------------------
-// PINWHEEL 2 INSTRUMENT
+// PINWHEEL Bamboo 
 //---------------------------------------------------------
 public class Pinwheel
 {
-    Bamboo blade => JCRev rev => dac; // Blade Cross
-    rev.mix(0.01);
-
-    4 * Math.PI => float MAX_VELOCITY;
+    Bamboo bamboo => JCRev revL => dac.chan(0); 
+    bamboo => DelayL dl => JCRev revR => dac.chan(1);  // Haas stereo effect
+    revL.mix(0.01);
+    revR.mix(0.01);
+    8::ms => dl.max => dl.delay;
 
     // Variables
     63 => int keyCenter;
-    [ 4, 7, 2, 7, 4, 12+4 ] @=> int pentatonic[];
-
-    0 => int pentIndex;
 
     // Set the key center
     fun void setKeyCenter(int midi) 
     {
+        // low instrument (but actually isn't used)
         midi - 24 => keyCenter; 
     }
 
+    // bamboo doesn't follow the score
     fun void updateScore(int newIndex) {}
 
     // Trigger the pinwheel and cycle the index
-    fun void blow(float velocity, int bladeIndex) 
+    fun void blow(float gain, int bladeIndex) 
     {
+        // shift 1 octave down
+        MIC_FREQ * 0.5 => float currFreq;
+        currFreq => bamboo.freq;
+
         // Trigger pinwheel
-        pentatonic[pentIndex] + (keyCenter + 12*Math.random2(0,2)) => Std.mtof => blade.freq;
-        blade.noteOn(velocityToGain(velocity));
-        // Update pentatonic index
-        pentIndex++;
-        if (pentIndex >= pentatonic.size()) 
-        {
-            0 => pentIndex;
-        };
-        100::ms => now;
-        blade.noteOff();
+        bamboo.noteOn(gain);
+
+        // When closer to 0, the bamboo rings for longer
+        // Otherwise don't note off as it will clip
+        if (gain < 0.5) {
+            ((1-gain)*500)::ms => now;
+            bamboo.noteOff();
+        } 
     }
 
-    fun float velocityToGain(float velocity) 
-    {
-        Math.sqrt(velocity / (MAX_VELOCITY)) => float gain;
-        return gain * .3 + .2;
-    }
 }

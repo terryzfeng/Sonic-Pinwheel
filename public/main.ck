@@ -72,8 +72,7 @@ spork ~ control();
 4 * Math.PI => float MAX_VELOCITY;
 fun float velocityToGain(float velocity) 
 {
-    Math.sqrt(velocity / (MAX_VELOCITY)) => float gain;
-    return gain * .3;
+    return Math.sqrt(velocity / (MAX_VELOCITY));
 }
 fun void pinwheelCrossing() 
 {

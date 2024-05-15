@@ -16,7 +16,7 @@ export function cout(
     const coloredMsg = `<span style="color: ${color};">${msg}</span>`;
     messages.push(coloredMsg);
 
-    // Only keep the last 100 messages
+    // Only keep the last MAX_MESSAGES
     if (messages.length > MAX_MESSAGES) {
         messages.shift();
     }

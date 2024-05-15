@@ -9,7 +9,8 @@ class Bass extends Chugraph
     SinOsc lfo => blackhole;
     63 => int pitch;
     bpf.freq(100);
-    bpf.Q(2);
+    bpf.Q(.1);
+    lpf.Q(3);
 
     osc.gain(0.4);
     osc2.gain(0.1);
@@ -39,8 +40,8 @@ class Bass extends Chugraph
         midiVal => pitch;
         osc.freq(Std.mtof(midiVal-SUB));
         osc2.freq(Std.mtof(midiVal-SUB-OCTAVE));
-        lpf.freq(Std.mtof(midiVal-SUB+OCTAVE));
-        bpf.freq(Std.mtof(midiVal-SUB+OCTAVE));
+        lpf.freq(Std.mtof(midiVal-OCTAVE+FIFTH));
+        bpf.freq(Std.mtof(midiVal-OCTAVE));
     }
 
     fun void freq(float freq) 

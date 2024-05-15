@@ -1,4 +1,3 @@
-global Event GLOBAL_TICK;
 //---------------------------------------------------------
 // Pingpong delay effect
 //---------------------------------------------------------
@@ -103,6 +102,7 @@ class Drift extends Chugraph {
 public class Pinwheel
 {
     Drift drift;
+    drift.gain(0.8);
     drift => PingPong p => dac;
 
     // Variables
@@ -182,8 +182,8 @@ public class Pinwheel
     // Trigger the pinwheel, play a drift note
     fun void blow(float gain, int bladeIndex) 
     {
+        Math.min(1, gain) => gain;
         // Play the pitch
-        3 *=> gain;
         if (mode == 0) {
             drift.midi(keyCenter + major[cycleIndex]);
         } else {

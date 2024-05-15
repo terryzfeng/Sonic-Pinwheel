@@ -28,7 +28,7 @@ const preloadFiles = [
     "pinwheel-bass.ck",
     "pinwheel-wind.ck",
     "pinwheel-chime.ck",
-    "pinwheel-2.ck",
+    "pinwheel-bamboo.ck",
     "pinwheel-3.ck",
     "pinwheel-4.ck",
     "pinwheel-drift.ck",
@@ -58,8 +58,10 @@ export async function initChuck(startButton: HTMLButtonElement) {
     startButton.disabled = true;
     startButton.innerText = "Loading...";
 
-    // Create theChuck
+    // Preload Chuck Chugins (WebChugin)
     Chuck.loadChugin("chugins/GVerb.chug.wasm");
+
+    // Create theChuck
     theChuck = await Chuck.init(
         filesToPreload,
         audioContext,
@@ -125,7 +127,8 @@ export async function startChuck(
     await theChuck.runFile("clock.ck");
     await theChuck.runFile("micTrack.ck");
     await theChuck.runFile(`pinwheel-${Settings.instName}.ck`);
-    cout(`Initializing Pinwheel: pinwheel-${Settings.instName}.ck`, BG_COLORS[Settings.instIndex], true);
+    cout("Initializing Pinwheel:", BG_COLORS[Settings.instIndex], true);
+    cout(`pinwheel-${Settings.instName}.ck`);
     await theChuck.runFile("main.ck");
 
     await new Promise((resolve) => setTimeout(resolve, 1000));

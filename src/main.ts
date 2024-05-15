@@ -32,8 +32,8 @@ class Main {
         });
     }
 
+    // Start the pinwheel
     async start() {
-        console.log("start");
         this.startButton.disabled = true;
         await startChuck(this.startButton);
         this.pinwheel.start();

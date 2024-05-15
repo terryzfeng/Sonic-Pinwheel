@@ -1,5 +1,6 @@
 import { theChuck } from "./host";
 
+const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
 const DECELERATE = 0.999;
 const DECELERATE2 = 0.998;
@@ -10,6 +11,7 @@ const WIDTH = 400;
 const HEIGHT = 400;
 const bladeX = 50 * RATIO;
 const bladeY = 150 * RATIO;
+const ICTUS_LARGE = 4 * RATIO;
 
 export default class Pinwheel {
     // Canvas Properties
@@ -22,7 +24,7 @@ export default class Pinwheel {
     private numBlades: number;
     private bladeDivisions: number;
     private bladeAngle: number;
-    private twoPi: number;
+    private ictusActive: number = 0;
 
     // Rotation Properties
     private rotation: number;
@@ -63,8 +65,7 @@ export default class Pinwheel {
         this.angularAcceleration = 0;
         this.previousRotation = 0;
         this.numBlades = 6;
-        this.twoPi = Math.PI * 2.0;
-        this.bladeDivisions = this.twoPi / this.numBlades;
+        this.bladeDivisions = TWO_PI / this.numBlades;
         this.bladeAngle = 0;
 
         this.ctx.scale(RATIO, RATIO);
@@ -136,7 +137,7 @@ export default class Pinwheel {
         this.ctx.arc(
             this.width / 2,
             this.height / 2 + bladeY,
-            8 * RATIO,
+            8 * RATIO + this.ictusActive,
             0,
             Math.PI * 2,
         );
@@ -150,16 +151,22 @@ export default class Pinwheel {
     private checkBladeCrossing() {
         this.bladeAngle += this.rotation - this.previousRotation;
         if (this.bladeAngle > this.bladeDivisions) {
+            // Update blade angle
             this.bladeAngle -= this.bladeDivisions;
+            // Blade is active and crossed the ictus circle
             if (!this.disabledBlades.has(this.currentBladeIndex)) {
+                this.ictusActive = ICTUS_LARGE;
                 theChuck.setFloat("PINWHEEL_VEL", this.angularVelocity);
                 theChuck.setInt("PINWHEEL_BLADE", this.currentBladeIndex);
                 theChuck.broadcastEvent("BLADE_CROSSED");
             }
+            // Blades count down in reverse order (clockwise)
             this.currentBladeIndex--;
             if (this.currentBladeIndex == -1) {
-                this.currentBladeIndex = this.numBlades - 1;
+                this.currentBladeIndex = this.numBlades - 1; // wrap around
             }
+        } else {
+            this.ictusActive = this.ictusActive * 0.9;
         }
     }
 
@@ -230,9 +237,9 @@ export default class Pinwheel {
         this.previousRotation = this.rotation;
         this.blowSpeed();
         this.rotation += this.angularVelocity * this.dt;
-        if (this.rotation > this.twoPi) {
-            this.rotation -= this.twoPi;
-            this.previousRotation -= this.twoPi;
+        if (this.rotation > TWO_PI) {
+            this.rotation -= TWO_PI;
+            this.previousRotation -= TWO_PI;
         }
 
         this.draw();
