@@ -3,7 +3,6 @@ const messages: (string | number)[] = [];
 
 const MAX_MESSAGES = 20;
 let consoleDisabled = localStorage["consoleDisabled"] === "true" || false; // TODO: Set to false to enable console
-console.log("consoleDisabled", consoleDisabled);
 
 export function cout(
     msg: string | number,

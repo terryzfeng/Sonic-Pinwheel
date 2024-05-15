@@ -21,13 +21,13 @@ select {
 
 /* MOBILE UI */
 .mobile {
-    @apply w-full px-4 max-w-[400px]
+    @apply w-full px-4 max-w-[400px];
 }
 
 /* if screen is larger than 400px */
 @media (min-width: 400px) {
     .mobile {
-        @apply px-0
+        @apply px-0;
     }
 }
 

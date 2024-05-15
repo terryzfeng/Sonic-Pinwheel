@@ -10,7 +10,7 @@ const BLADE_COLORS = [
     "#9b59b6",
     "#1abc9c",
 ];
-const BG_COLORS = [
+export const BG_COLORS = [
     "#ABEFCD",
     "#ABCDEF",
     "#CDEFAB",
@@ -26,6 +26,7 @@ export default class Settings {
     public static instDropdown: HTMLSelectElement;
     public static bgCanvas: HTMLCanvasElement;
     public static instName: string = INST_NAMES[0];
+    public static instIndex: number = -1;
 
     private static buttonStates: boolean[] = [
         true,
@@ -55,6 +56,10 @@ export default class Settings {
             Settings.handleDropdownChange(index);
         });
 
+        Settings.instDropdown.addEventListener("click", () => {
+            Settings.instDropdown.classList.remove("enabled:animate-pulse");
+        }, { once: true });
+
         // Get the current selected index
         const index = Settings.instDropdown.selectedIndex;
         Settings.handleDropdownChange(index);
@@ -82,6 +87,7 @@ export default class Settings {
 
     private static handleDropdownChange(index: number) {
         Settings.bgCanvas.style.backgroundColor = BG_COLORS[index];
+        Settings.instIndex = index;
         Settings.instName = INST_NAMES[index];
     }
 

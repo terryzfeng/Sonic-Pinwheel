@@ -8,7 +8,7 @@
 
 import { Chuck } from "webchuck";
 import { cout } from "./utils/print";
-import Settings from "./settings";
+import Settings, { BG_COLORS } from "./settings";
 import { startVisualizer } from "./utils/visualizer";
 
 let theChuck: Chuck;
@@ -94,7 +94,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
                         " id = " +
                         device.deviceId,
                     undefined,
-                    false
+                    false,
                 );
             }
         });
@@ -125,6 +125,7 @@ export async function startChuck(
     await theChuck.runFile("clock.ck");
     await theChuck.runFile("micTrack.ck");
     await theChuck.runFile(`pinwheel-${Settings.instName}.ck`);
+    cout(`Initializing Pinwheel: pinwheel-${Settings.instName}.ck`, BG_COLORS[Settings.instIndex], true);
     await theChuck.runFile("main.ck");
 
     await new Promise((resolve) => setTimeout(resolve, 1000));

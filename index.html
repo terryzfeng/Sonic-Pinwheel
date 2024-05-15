@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class="w-full">
-      <div id="app" class="w-full sm:w-3/4 xl:w-1/2 flex flex-col items-center m-auto">
+      <div id="app" class="w-full sm:w-3/4 xl:w-1/2 flex flex-col items-center m-auto sm:border-4 sm:border-slate-200">
 
         <header class="w-full h-20 flex justify-center items-center">
           <h1 class="text-4xl text-center">Sonic Pinwheel</h1>
@@ -19,7 +19,7 @@
         <div id="instrumentSelect" class="mobile h-20 py-2 px-4 lg:px-0 flex justify-between align-middle items-center">
           <h1 id="select-inst-prompt" class="text-lg pb-2 transition">Select an instrument</h1>
           <div class="items-center px-1 py-1 border-2 border-gray-100 rounded-full enabled:hover:border-gray-200">
-              <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:opacity-75 enabled:hover:cursor-pointer disabled:opacity-50">
+              <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:opacity-75 enabled:hover:cursor-pointer enabled:animate-pulse disabled:opacity-50">
                   <option value="0">Wind</option>
                   <option value="1" selected>Chimes</option>
                   <option value="2">Bamboo</option>
@@ -65,7 +65,7 @@
         <br>
 
         <!-- START -->
-        <button id="start" type="button" class="rounded-full border-2 border-sky-950 py-2 px-8 disabled:opacity-50 text-3xl">Start</button>
+        <button id="start" type="button" class="rounded-full text-3xl border-2 border-sky-950 py-2 px-8 disabled:opacity-50 enabled:hover:opacity-50 transition">Start</button>
         <br>
         <br>
         <br>

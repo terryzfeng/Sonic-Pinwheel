@@ -18,20 +18,8 @@ class Main {
             await initChuck(this.startButton);
 
             // START button is clicked
-            this.startButton.addEventListener("click", async () => {
-                this.startButton.disabled = true;
-                await startChuck(this.startButton);
-                this.pinwheel.start();
-
-                // animation pause/resume
-                document.addEventListener("visibilitychange", () => {
-                    if (document.hidden) {
-                        cancelAnimationFrame(this.pinwheel.animationID);
-                    } else {
-                        this.pinwheel.start();
-                    }
-                });
-                Settings.disableDropdown();
+            this.startButton.addEventListener("click", this.start.bind(this), {
+                once: true,
             });
 
             // Add keyboard shortcuts
@@ -42,6 +30,34 @@ class Main {
                 }
             });
         });
+    }
+
+    async start() {
+        console.log("start");
+        this.startButton.disabled = true;
+        await startChuck(this.startButton);
+        this.pinwheel.start();
+
+        // animation pause/resume
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                cancelAnimationFrame(this.pinwheel.animationID);
+            } else {
+                this.pinwheel.start();
+            }
+        });
+
+        Settings.disableDropdown();
+
+        // TODO FUTURE FEATURE:
+        // Add pinwheel toggle auto constant speed
+        // this.startButton.addEventListener("click", () => {
+        //     this.pinwheel.toggleConstantSpeed();
+        //     this.startButton.innerText = this.pinwheel.useConstantSpeed
+        //         ? "AUTO"
+        //         : "BLOW!";
+        // });
+        // this.startButton.disabled = false;
     }
 }
 
