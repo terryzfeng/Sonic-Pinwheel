@@ -2,7 +2,8 @@ const out = document.getElementById("console")!;
 const messages: (string | number)[] = [];
 
 const MAX_MESSAGES = 20;
-export let consoleDisabled = localStorage["consoleDisabled"] === "true" || false; // TODO: Set to false to enable console
+export let consoleDisabled =
+    localStorage["consoleDisabled"] === "true" || false; // TODO: Set to false to enable console
 
 export function cout(
     msg: string | number,
