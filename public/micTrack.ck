@@ -9,6 +9,7 @@ public class MicTrack
     float _freq;
     float _dbfs;
     float _threshold;
+    float _corrThreshold;
 
     512 => int WINDOW_SIZE;
     // Blowing gain detection (RMS)
@@ -26,6 +27,7 @@ public class MicTrack
     440 => _freq;
     -60 => _dbfs;
     -20 => _threshold;
+    0.3 => _corrThreshold;
 
     // Return magnitude of the mic input
     fun float getMag() {
@@ -76,7 +78,7 @@ public class MicTrack
                     corr.fval(bin) => mag;
                 }
             }
-            if (mag > 0.5) {
+            if (mag > _corrThreshold) {
                 // Update pitch if above correlation mag threshold
                 sr/maxBin => _freq;
             }

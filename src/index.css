@@ -60,6 +60,9 @@ select {
     @apply w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-4 transition;
 }
 
-.active {
-    @apply outline-dashed bg-blue-500 text-white;
+.modal {
+    @apply w-[98vw] px-8 py-6 rounded-xl dark:bg-dark dark:text-white shadow transition;
+    max-height: 75vh;
+    max-width: 640px;
+    animation: enter-transition 0.1s ease-in-out forwards;
 }

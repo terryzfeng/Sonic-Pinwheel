@@ -15,8 +15,9 @@ let theChuck: Chuck;
 let audioContext: AudioContext;
 let adc: MediaStreamAudioSourceNode;
 let micGain: GainNode;
+let chuckGain: GainNode;
 let analyser: AnalyserNode;
-export { theChuck };
+export { theChuck, chuckGain };
 
 const PIECE_LENGTH = 6; // minutes
 
@@ -50,6 +51,8 @@ export async function initChuck(startButton: HTMLButtonElement) {
     audioContext.suspend();
     micGain = audioContext.createGain();
     micGain.gain.value = 1.0;
+    chuckGain = audioContext.createGain();
+    chuckGain.gain.value = 1.0;
 
     // connect micGain to analyser
     analyser = audioContext.createAnalyser();
@@ -67,7 +70,7 @@ export async function initChuck(startButton: HTMLButtonElement) {
         audioContext,
         audioContext.destination.maxChannelCount,
     );
-    theChuck.connect(audioContext.destination);
+    theChuck.connect(chuckGain).connect(audioContext.destination);
 
     // Microphone setup
     cout("Probing Microphones:", "green", false);
@@ -120,7 +123,7 @@ export async function startChuck(
             adc = audioContext.createMediaStreamSource(stream);
             adc.connect(micGain).connect(theChuck);
         });
-
+    setupMicGainSlider();
     audioContext.resume();
     startButton.innerHTML = "Syncing...";
 
@@ -140,7 +143,6 @@ export async function startChuck(
     startButton.innerHTML = "BLOW!";
 
     startInputMonitor();
-    setupMicGainSlider();
     startVisualizer(analyser);
 }
 

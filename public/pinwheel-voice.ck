@@ -12,10 +12,10 @@
 global float MIC_FREQ;
 
 //---------------------------------------------------------
-// PINWHEEL VIBRAPHONE
+// voice - aah granular synthesis
 //---------------------------------------------------------
 // class Voice extends Chugraph {
-//     // Patch
+//     // noise
 //     LiSa lisa => Gain bus => LPF lpf => ADSR adsr => outlet;
 //     15000 => lpf.freq;
 //     adsr.set( 30::ms, 30::ms, 0.9, 200::ms );
@@ -175,31 +175,26 @@ class Formant extends Chugraph {
 
 class Voice extends Chugraph
 {
-    // Patch
-    // SinOsc patch => Gain bus => ADSR adsr => NRev r => outlet;
-    // patch.gain(0.9);
-    3 => int NUM_VOICES;
-    // Noise
-    Noise patch => Gain formantBus;
-    patch.gain(0.1);
-    // Pulse
-    PulseOsc pulse[NUM_VOICES] => Gain pulseBus => Chorus c => formantBus;
-    pulse[0].width(.1); pulse[1].width(.9); pulse[2].width(.2);
-    pulse[0].freq(220);
-    pulse[1].freq(220 * 1.5);
-    pulse[2].freq(220 * 1.2);
-    pulseBus.gain(1.0/NUM_VOICES);
-    // Formant
+    1 => int NUM_VOICES;
+    // noise
     Gain bus => ADSR adsr => NRev r => outlet;
-    formantBus => Formant f1(207, 1, 5) => bus;
-    formantBus => Formant f2(2300, 0.6, 20) => bus;
-    formantBus => Formant f3(3000, .9, 50) => bus;
+    // Noise
+    Noise noise => Gain formantBus;
+    noise.gain(0.01);
+    formantBus => Formant f1(300, 1, 5) => bus;
+    formantBus => Formant f2(870, 0.6, 20) => bus;
+    formantBus => Formant f3(2250, .4, 50) => bus;
+    // SinOsc
+    SinOsc osc[NUM_VOICES] => LPF lpf => Chorus c => Gain oscBus => bus;
+    oscBus.gain(.4 * (1.0/NUM_VOICES));
 
     // FX
+    lpf.freq(Std.mtof(63+12));
+    lpf.Q(2);
     c.baseDelay( 10::ms );
-    c.modDepth( .9 );
+    c.modDepth( .1 );
     c.modFreq( 3 );
-    c.mix( .2 );
+    c.mix( .3 );
     r.mix(0.1);
 
     // Member vars
@@ -211,18 +206,18 @@ class Voice extends Chugraph
 
     // Constants
     3::second => dur AUTO_OFF;
-    .5 => float SLIDE_RATIO;
-    
+    .1 => float SLIDE_RATIO;
 
     // Init
-    adsr.set(100::ms, 2::second, .2, 2::second);
+    adsr.set(100::ms, 1.5::second, .0, 2::second);
 
     fun void noteOn(float gain) 
     {
         gain => _targetGain;
-        adsr.keyOn();
-
         gain * SLIDE_RATIO => _slideSpeed;
+        Math.random2(0, 2) => int formantIndex;
+
+        adsr.keyOn();
 
         now => _lastOn;
         _noteTriggered.broadcast();
@@ -244,9 +239,9 @@ class Voice extends Chugraph
 
     fun void movement() {
         SinOsc lfo => blackhole;
-        lfo.period(1::second);
+        lfo.period(2::second);
         while(true) {
-            207 + (30*lfo.last()) => f1.freq;
+            207 + (10*lfo.last()) => f1.freq;
             2200 + (20*lfo.last()) => f2.freq;
             3000 + (10*-lfo.last()) => f3.freq;
             10::ms => now;
@@ -258,7 +253,10 @@ class Voice extends Chugraph
     fun void pitchSlider() {
         while(true) {
             // Pitch slider
-            (_targetFreq * _slideSpeed) + (_freq * (1 - _slideSpeed)) => _freq => pulse[0].freq => pulse[1].freq => pulse[2].freq;
+            (_targetFreq * _slideSpeed) + (_freq * (1 - _slideSpeed)) => _freq;
+            for (int i; i < NUM_VOICES; i++) {
+                _freq + Math.random2f(-10, 10) => osc[i].freq;
+            }
             // Gain slider
             (_targetGain * _slideSpeed) + (_gain * (1 - _slideSpeed)) => _gain => bus.gain;
             10::ms => now;
@@ -327,7 +325,6 @@ public class Pinwheel
         // Get octave 
         (midi / 12) * 12 => int octave;
         Std.mtof(octave + major[majorIndex]) => float newFreq;
-        <<< freq, newFreq >>>;
         return newFreq;
     }
 }

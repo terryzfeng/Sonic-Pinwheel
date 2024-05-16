@@ -1,4 +1,5 @@
 import { initChuck, startChuck } from "./host";
+import { initMenu } from "./menu";
 import Pinwheel from "./pinwheel";
 import Settings from "./settings";
 
@@ -16,6 +17,7 @@ class Main {
     init() {
         window.addEventListener("load", async () => {
             await initChuck(this.startButton);
+            initMenu();
 
             // START button is clicked
             this.startButton.addEventListener("click", this.start.bind(this), {

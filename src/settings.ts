@@ -1,6 +1,6 @@
 import Pinwheel from "./pinwheel";
 
-const NUM_INSTRUMENTS = 3;
+const NUM_INSTRUMENTS = 6;
 const DROPDOWN_ID = "instruments";
 
 const BLADE_COLORS = [
@@ -45,12 +45,6 @@ export default class Settings {
             canvasId,
         ) as HTMLCanvasElement;
 
-        for (let i = 0; i < NUM_INSTRUMENTS; i++) {
-            const option = document.createElement("option");
-            option.value = i.toString();
-            option.text = `Instrument ${i}`;
-        }
-
         Settings.instDropdown.addEventListener("change", () => {
             const index = Settings.instDropdown.selectedIndex;
             Settings.handleDropdownChange(index);
@@ -64,9 +58,12 @@ export default class Settings {
             { once: true },
         );
 
-        // Get the current selected index
-        const index = Settings.instDropdown.selectedIndex;
-        Settings.handleDropdownChange(index);
+        // // Get the current selected index
+        // const index = Settings.instDropdown.selectedIndex;
+
+        // Select a random pinwheel instrument
+        Settings.instDropdown.selectedIndex = Math.random() * NUM_INSTRUMENTS;
+        Settings.handleDropdownChange(Settings.instDropdown.selectedIndex);
 
         // Get blade control buttons
         const bladeButtons = document.getElementsByClassName("blade-button");
