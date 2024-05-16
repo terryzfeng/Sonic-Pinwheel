@@ -45,7 +45,7 @@ class Stick extends Chugraph
     
     fun void noteOn(float gain) 
     {
-        Math.random2f( 10, 40 ) => float stickHardness;
+        Math.random2f( 0, 20 ) => float stickHardness;
         Math.random2f( 10, 80 ) => float strikePosition;
         Math.random2f( 0, 2 ) => float vibratoGain;
         Math.random2f( 20, 50 ) => float vibratoFreq;
@@ -66,6 +66,11 @@ class Stick extends Chugraph
     fun void freq(float freq) 
     {
         freq => bar.freq;
+    }
+
+    fun void midi(int note) 
+    {
+        Std.mtof(note) => bar.freq;
     }
     
     fun float freq() 
@@ -166,6 +171,10 @@ class Vibraphone extends Chugraph
         10 * _freq => osc2.freq;
         16 * _freq => osc3.freq;
     }
+
+    fun void midi(int note) {
+        freq(Std.mtof(note));
+    }
     
     fun float freq() 
     {
@@ -253,11 +262,10 @@ public class Pinwheel
 {
     Stick stick(0.5::second) => GVerb gverb => dac;
     Vibraphone vibe() => LPF lpf => HPF hpf => PingPong p => gverb;
-    lpf.freq(11000);
+    lpf.freq(10000);
     hpf.freq(1000);
     stick.gain(0.9);
-    vibe.gain(0.6);
-
+    vibe.gain(0.2);
 
     30 => gverb.roomsize;
     1.6::second => gverb.revtime;
@@ -267,36 +275,79 @@ public class Pinwheel
     
     // Variables
     63 => int keyCenter;
+    0 => int scoreIndex;
+
+    // Chimes SCORE (2 mo
+    [0, 2, 4, 5, 7, 9, 11, 12, 14, 16] @=> int major[];
     [2, 0, 2, 4, -5, -1, 4, 7, 7, 7, 7, 5, 4, -15, -13, -12, 2, 2, 12, 7, 7, -8, -5, -1, -1, 7, 2, 2, 4, -5, 0] @=> int pentatonic[];
-    
-    0 => int pentIndex;
+    major.size() => int currLength;
+    0 => int mode;
+    0 => int cycleIndex;
+    0 => int cycleStart;
     
     // Set the key center
     fun void setKeyCenter(int midi) 
     {
-        midi => keyCenter; 
+        midi + 12 => keyCenter; 
     }
     
-    fun void updateScore(int newIndex) {}
+    fun void updateScore(int newIndex) {
+        newIndex => scoreIndex;
+        // Major Scale Mode
+        if (scoreIndex == 0 || scoreIndex >= 32) {
+            0 => mode;
+            major.size() - Math.random2(0,2) => currLength;
+            0 => cycleStart;
+        } else {
+            1 => mode;
+            Math.random2(0,pentatonic.size()-1) => cycleStart;
+            Math.random2(cycleStart,pentatonic.size()-1) => cycleIndex;
+        }
+    }
+
+    fun void incCycle() {
+        // Scale Mode
+        if (mode == 0) {
+            ++cycleIndex;
+            if (cycleIndex >= currLength) {
+                Math.random2(cycleStart,currLength-1) => cycleIndex;
+            }
+        } else {
+            // Pentatonic
+            ++cycleIndex;
+            // double skip occasionally
+            if (cycleIndex < currLength && pentatonic[cycleIndex] > 7 && maybe && maybe) {
+                ++cycleIndex;
+            }
+            if (cycleIndex >= currLength) {
+                if (scoreIndex % 3 == 0 || scoreIndex % 4 == 0) {
+                    cycleStart + Math.random2(0,2) => cycleIndex; // Random reset back to 2
+                } else {
+                    cycleStart => cycleIndex; // Normal reset back to 3
+                }
+                // Set random end loop length
+                Math.random2(cycleIndex,pentatonic.size()-1) => currLength;
+            }
+        }
+    }
     
     // Trigger the pinwheel and cycle the index
     fun void blow(float gain, int bladeIndex) 
     {
-        // Trigger pinwheel
-        pentatonic[pentIndex] + (keyCenter + 12) => Std.mtof => stick.freq;
-        pentatonic[pentIndex] + (keyCenter + 12) /*+ 12 * Math.random2(0,1)*/ => Std.mtof => vibe.freq;
-
+        Math.min(gain, 1.0) => gain;
+        // Play the pitch
+        if (mode == 0) {
+            stick.midi(keyCenter + major[cycleIndex]);
+            vibe.midi(keyCenter + major[cycleIndex]);
+        } else {
+            stick.midi(keyCenter + pentatonic[cycleIndex]);
+            vibe.midi(keyCenter + pentatonic[cycleIndex]);
+        }
         stick.noteOn(gain);
         vibe.noteOn(gain);
+        incCycle();
 
-        // Update pentatonic index
-        pentIndex++;
-        if (pentIndex >= pentatonic.size()) 
-        {
-            0 => pentIndex;
-        };
-
-        5000::ms => now;
+        1000::ms => now;
         // stick.noteOff();
         // vibe.noteOff();
     }
