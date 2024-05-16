@@ -11,6 +11,7 @@ class Bamboo extends Chugraph
     // Trickly kind of shaker
     shake.which(22);
 
+    // Compressor
     d.compress();
     2000::ms => d.releaseTime;
     0.2 => d.thresh;
@@ -19,7 +20,8 @@ class Bamboo extends Chugraph
 
     fun void noteOn(float gain) 
     {
-        1 => shake.objects;
+        // Inverse gain to number of objects, max 30
+        30 - (29*gain) => shake.objects;
         gain * 2 => shake.noteOn;
     }
 
@@ -43,11 +45,8 @@ class Bamboo extends Chugraph
 //---------------------------------------------------------
 public class Pinwheel
 {
-    Bamboo bamboo => JCRev revL => dac.chan(0); 
-    bamboo => DelayL dl => JCRev revR => dac.chan(1);  // Haas stereo effect
+    Bamboo bamboo => JCRev revL => dac; 
     revL.mix(0.01);
-    revR.mix(0.01);
-    8::ms => dl.max => dl.delay;
 
     // Variables
     63 => int keyCenter;

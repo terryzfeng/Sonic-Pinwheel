@@ -12,8 +12,8 @@ class Bass extends Chugraph
     bpf.Q(.1);
     lpf.Q(3);
 
-    osc.gain(0.4);
-    osc2.gain(0.1);
+    osc.gain(0.3);
+    osc2.gain(0.3); // sub
     adsr.set(10::ms, 300::ms, 0, 0::ms);
     rev.mix(0.06);
 
@@ -48,7 +48,7 @@ class Bass extends Chugraph
     {
         osc.freq(freq);
         osc2.freq(Std.mtof(Std.ftom(freq) - OCTAVE));
-        lpf.freq(Std.mtof(Std.ftom(freq) + 2 * OCTAVE));
+        lpf.freq(Std.mtof(Std.ftom(freq) + 1 * OCTAVE));
         bpf.freq(Std.mtof(Std.ftom(freq) + 12));
     }
 

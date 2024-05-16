@@ -1,32 +1,49 @@
 <!doctype html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sonic Pinwheel</title>
+    <meta name="description" content="Sonic Pinwheel by Terry Feng - A browser-based instrument, a distributed and collaborative composition, an interactive musical experience.">
     <link rel="stylesheet" href="./src/index.css" />
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="favicon_io/site.webmanifest">
   </head>
+
   <body>
     <div class="w-full">
-      <div id="app" class="w-full sm:w-3/4 xl:w-1/2 flex flex-col items-center m-auto sm:border-4 sm:border-slate-200">
+      <div id="app" class="w-full relative sm:w-3/4 xl:w-1/2 flex flex-col items-center m-auto sm:border-4 sm:border-slate-200">
 
+        <!-- Title: Sonic Pinwheel -->
         <header class="w-full h-20 flex justify-center items-center">
           <h1 class="text-4xl text-center">Sonic Pinwheel</h1>
         </header>
 
+        <!-- Floating menu bar in the top right -->
+        <button id="menu-button" class="absolute top-0 right-0 p-2 m-2 text-2xl rounded-full hover:bg-slate-100 hover:cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16m-7 6h7"></path>
+          </svg>
+        </button>
+
         <!-- Instrument Select -->
         <div id="instrumentSelect" class="mobile h-20 py-2 px-4 lg:px-0 flex justify-between align-middle items-center">
           <h1 id="select-inst-prompt" class="text-lg pb-2 transition">Select an instrument</h1>
-          <div class="items-center px-1 py-1 border-2 border-gray-100 rounded-full enabled:hover:border-gray-200">
-              <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:opacity-75 enabled:hover:cursor-pointer enabled:animate-pulse disabled:opacity-50">
-                  <option value="0">Wind</option>
-                  <option value="1">Chimes</option>
-                  <option value="2" selected>Bamboo</option>
-                  <option value="3">Bass</option>
-                  <option value="4">Voice</option>
-                  <option value="5">Drift</option>
-              </select>
+          <div class="items-center px-1 py-1 border-2 border-gray-100 rounded-full enabled:hover:bg-slate-50">
+            <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:bg-slate-50 enabled:hover:cursor-pointer enabled:animate-pulse disabled:opacity-50">
+              <option value="0">Wind</option>
+              <option value="1">Chimes</option>
+              <option value="2">Bamboo</option>
+              <option value="3">Bass</option>
+              <option value="4" selected>Voice</option>
+              <option value="5">Drift</option>
+            </select>
           </div>
         </div>
 
@@ -34,7 +51,8 @@
           <!-- <canvas id="ui-canvas" width="400" height="400" class=""></canvas> -->
           <canvas id="pinwheel-canvas" width="400" height="400" class=""></canvas>
           <canvas id="input-canvas" width="400" height="400" class=""></canvas>
-          <canvas id="bg-canvas" width="400" height="400" class="transition" style="background-color: #ABCDEF;"></canvas>
+          <canvas id="bg-canvas" width="400" height="400" class="transition"
+            style="background-color: #ABCDEF;"></canvas>
         </div>
 
         <!-- Mic Monitoring -->
@@ -44,7 +62,7 @@
           <span id="freq" class="mr-2">440.00 Hz</span>
           <span id="dbfs">0.00 dB</span>
         </div>
-        <br> 
+        <br>
 
         <!-- Blade Control-->
         <div id="blade-buttons" class="mobile lg:px-0 flex justify-between">
@@ -59,23 +77,78 @@
 
         <!-- Microphone Control-->
         <div id="microphone-control" class="mobile lg:px-0 flex">
-            <img src="/img/mic.svg" class="w-9 h-9 inline-block pr-2 text-red-400"/>
-            <input type="range" id="mic-gain" min="0" max="100" value="50" class="w-full" />
+          <img src="/img/mic.svg" class="w-9 h-9 inline-block pr-2 text-red-400" />
+          <input type="range" id="mic-gain" min="0" max="100" value="50" class="w-full" />
         </div>
         <br>
 
         <!-- START -->
-        <button id="start" type="button" class="rounded-full text-3xl border-2 border-sky-950 py-2 px-8 disabled:opacity-50 enabled:hover:opacity-50 transition">Start</button>
+        <button id="start" type="button"
+          class="rounded-full text-3xl border-2 border-sky-950 py-2 px-8 disabled:opacity-50 enabled:hover:opacity-50 transition">Start</button>
         <br>
         <br>
         <br>
 
+        <!-- Console -->
         <div id="console" class="font-mono text-md p-4 justify-start w-full h-48 overflow-auto bg-slate-50">
           <b>console output:</b><br>
         </div>
+
+
+        <!-- Menu -->
+        <dialog id="menu-dialog" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <!--
+            Background backdrop, show/hide based on modal state.
+        
+            Entering: "ease-out duration-300"
+              From: "opacity-0"
+              To: "opacity-100"
+            Leaving: "ease-in duration-200"
+              From: "opacity-100"
+              To: "opacity-0"
+          -->
+          <div class="fixed inset-0 bg-white bg-opacity-75 transition-opacity"></div>
+
+          <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <!--
+                Modal panel, show/hide based on modal state.
+        
+                Entering: "ease-out duration-300"
+                  From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                  To: "opacity-100 translate-y-0 sm:scale-100"
+                Leaving: "ease-in duration-200"
+                  From: "opacity-100 translate-y-0 sm:scale-100"
+                  To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              -->
+              <div
+                class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                  <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                      <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Deactivate account
+                      </h3>
+                      <div class="mt-2">
+                        <p class="text-gray-500">Are you sure you want to deactivate your account? All of your data will
+                          be permanently removed. This action cannot be undone.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button type="button"
+                    class="inline-flex w-full justify-center rounded-full bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Deactivate</button>
+                  <!-- <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </dialog>
+
       </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
+
 </html>

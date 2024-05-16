@@ -24,7 +24,7 @@ class PingPong extends Chugraph {
 // Drift - Pinwheel
 //---------------------------------------------------------
 class Drift extends Chugraph {
-    20 => int NUM_VOICES;
+    8 => int NUM_VOICES;
     SawOsc osc[NUM_VOICES]; TriOsc osc2[NUM_VOICES];
     ADSR adsr1[NUM_VOICES]; ADSR adsr2[NUM_VOICES];
     BPF bpf[NUM_VOICES];

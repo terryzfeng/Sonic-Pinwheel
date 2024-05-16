@@ -22,6 +22,7 @@ const PIECE_LENGTH = 6; // minutes
 
 // FILES TO LOAD INTO CHUCK
 const preloadFiles = [
+    "aah.wav",
     "main.ck",
     "clock.ck",
     "micTrack.ck",
@@ -29,8 +30,7 @@ const preloadFiles = [
     "pinwheel-wind.ck",
     "pinwheel-chime.ck",
     "pinwheel-bamboo.ck",
-    "pinwheel-3.ck",
-    "pinwheel-4.ck",
+    "pinwheel-voice.ck",
     "pinwheel-drift.ck",
 ];
 
@@ -69,21 +69,6 @@ export async function initChuck(startButton: HTMLButtonElement) {
     );
     theChuck.connect(audioContext.destination);
 
-    // Connect microphone
-    navigator.mediaDevices
-        .getUserMedia({
-            video: false,
-            audio: {
-                // echoCancellation: false,
-                autoGainControl: false,
-                noiseSuppression: false,
-            },
-        })
-        .then((stream) => {
-            adc = audioContext.createMediaStreamSource(stream);
-            adc.connect(micGain).connect(theChuck);
-        });
-
     // Microphone setup
     cout("Probing Microphones:", "green", false);
     navigator.mediaDevices.enumerateDevices().then(function (devices) {
@@ -121,6 +106,21 @@ export function readyChuck(startButton: HTMLButtonElement) {
 export async function startChuck(
     startButton: HTMLButtonElement,
 ): Promise<void> {
+    // Connect microphone
+    navigator.mediaDevices
+        .getUserMedia({
+            video: false,
+            audio: {
+                // echoCancellation: false,
+                autoGainControl: false,
+                noiseSuppression: false,
+            },
+        })
+        .then((stream) => {
+            adc = audioContext.createMediaStreamSource(stream);
+            adc.connect(micGain).connect(theChuck);
+        });
+
     audioContext.resume();
     startButton.innerHTML = "Syncing...";
 

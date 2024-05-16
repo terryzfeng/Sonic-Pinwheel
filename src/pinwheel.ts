@@ -3,7 +3,7 @@ import { theChuck } from "./host";
 const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
 const DECELERATE = 0.999;
-const DECELERATE2 = 0.998;
+const DECELERATE2 = 0.997;
 
 // Scaling
 const RATIO = window.devicePixelRatio || 1;

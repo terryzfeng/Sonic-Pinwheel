@@ -20,7 +20,7 @@ export const BG_COLORS = [
     "#EFCDAB",
 ];
 // e.g. pinwheel-bass.ck, pinwheel-wind.ck, pinwheel-chime.ck, ...
-const INST_NAMES = ["wind", "chime", "bamboo", "bass", "4", "drift"];
+const INST_NAMES = ["wind", "chime", "bamboo", "bass", "voice", "drift"];
 
 export default class Settings {
     public static instDropdown: HTMLSelectElement;
