@@ -37,6 +37,7 @@ export function initMenu() {
     volumeSlider.oninput = () => {
         setVolume(parseInt(volumeSlider.value));
     };
+    setVolume(volume);
 
     // Initialize logging checkbox
     loggingCheckbox.checked = !consoleDisabled;

@@ -107,7 +107,6 @@ public class Pinwheel
 
     // Variables
     63 => int keyCenter;
-    keyCenter => int pitch;
     0 => int scoreIndex;
 
     // Drift SCORE (2 modes: Scale or Pentatonic)
@@ -117,8 +116,8 @@ public class Pinwheel
     [-10, -8,
      -7, -5, -3,
      0, 2, 4, 7, 11, 12, 14, 16] @=> int pentatonic[]; // + major 7
-    0 => int mode; // 0 = major, 1 = pentatonic
     major.size() => int currLength;
+    0 => int mode; // 0 = major, 1 = pentatonic
     0 => int cycleIndex;
     0 => int cycleStart;
 

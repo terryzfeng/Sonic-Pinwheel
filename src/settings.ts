@@ -58,9 +58,6 @@ export default class Settings {
             { once: true },
         );
 
-        // // Get the current selected index
-        // const index = Settings.instDropdown.selectedIndex;
-
         // Select a random pinwheel instrument
         Settings.instDropdown.selectedIndex = Math.random() * NUM_INSTRUMENTS;
         Settings.handleDropdownChange(Settings.instDropdown.selectedIndex);
