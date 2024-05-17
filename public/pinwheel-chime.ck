@@ -300,7 +300,7 @@ public class Pinwheel
             0 => cycleStart;
         } else {
             1 => mode;
-            Math.random2(0,pentatonic.size()-1) => cycleStart;
+            Math.random2(0,pentatonic.size()-2) => cycleStart;
             Math.random2(cycleStart,pentatonic.size()-1) => cycleIndex;
         }
     }
