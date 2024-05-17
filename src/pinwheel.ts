@@ -2,8 +2,8 @@ import { theChuck } from "./host";
 
 const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
-const DECELERATE = 0.999;
-const DECELERATE2 = 0.997;
+const HIGH_SPEED_DECELERATION = 0.997;
+const LOW_SPEED_DECELERATION = 0.999;
 
 // Scaling
 const RATIO = window.devicePixelRatio || 1;
@@ -193,10 +193,10 @@ export default class Pinwheel {
             this.angularAcceleration = 2 + newAcceleration;
             this.angularVelocity += this.angularAcceleration * this.dt;
         } else {
-            if (this.angularVelocity > Math.PI) {
-                this.angularVelocity *= DECELERATE;
+            if (this.angularVelocity > TWO_PI) {
+                this.angularVelocity *= HIGH_SPEED_DECELERATION;
             } else {
-                this.angularVelocity *= DECELERATE2;
+                this.angularVelocity *= LOW_SPEED_DECELERATION;
             }
         }
         // Minimum speed
