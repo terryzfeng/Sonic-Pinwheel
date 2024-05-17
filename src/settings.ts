@@ -94,6 +94,7 @@ export default class Settings {
      */
     public static disableDropdown() {
         Settings.instDropdown.disabled = true;
+        Settings.instDropdown.title = "Refresh page to change instrument";
         // Get select prompt
         const selectPrompt = document.getElementById("select-inst-prompt")!;
         selectPrompt.classList.add("opacity-0");
