@@ -1,5 +1,6 @@
 import { initChuck, startChuck } from "./host";
 import { initMenu } from "./menu";
+import { initMidi } from "./teensyMidi";
 import Pinwheel from "./pinwheel";
 import Settings from "./settings";
 
@@ -17,6 +18,7 @@ class Main {
     init() {
         window.addEventListener("load", async () => {
             await initChuck(this.startButton);
+            initMidi(this.pinwheel); // Teensy Midi
             initMenu();
 
             // START button is clicked

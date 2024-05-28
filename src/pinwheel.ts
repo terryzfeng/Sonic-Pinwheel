@@ -2,8 +2,8 @@ import { theChuck } from "./host";
 
 const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
-const HIGH_SPEED_DECELERATION = 0.997;
-const LOW_SPEED_DECELERATION = 0.999;
+const HIGH_SPEED_DECELERATION = 0.99;
+const LOW_SPEED_DECELERATION = 0.99;
 
 // Scaling
 const RATIO = window.devicePixelRatio || 1;
@@ -207,6 +207,10 @@ export default class Pinwheel {
         if (this.useConstantSpeed) {
             this.angularVelocity = this.constantSpeed;
         }
+    }
+
+    public getAngularVelocity() {
+        return this.angularVelocity;
     }
 
     public disableBlade(bladeIndex: number) {
