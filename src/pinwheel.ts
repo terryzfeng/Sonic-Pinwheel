@@ -2,7 +2,7 @@ import { theChuck } from "./host";
 
 const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
-const HIGH_SPEED_DECELERATION = 0.99;
+const HIGH_SPEED_DECELERATION = 0.99; // TODO: this is MIDI physics
 const LOW_SPEED_DECELERATION = 0.99;
 
 // Scaling

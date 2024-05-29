@@ -1,20 +1,28 @@
 import Pinwheel from "./pinwheel";
+import { cout } from "./utils/print";
 
 let midi: MIDIAccess;
+let midiOutput: MIDIOutput;
 let teensyId: string;
 let pinwheelRef: Pinwheel;
 let isOn = false;
 
 function onMIDISuccess(midiAccess: MIDIAccess)  {
-    console.log("MIDI ready!");
     midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
+    cout("Probing MIDI devices:", "green", false);
     for (const entry of midi.outputs) {
         const output = entry[1];
-        //console.log( `Output port [type:'${output.type}'] id: '${output.id}' manufacturer: '${output.manufacturer}' name: '${output.name}' version: '${output.version}'`,);
+        cout( `Output port [type:'${output.type}'] id: '${output.id}' manufacturer: '${output.manufacturer}' name: '${output.name}' version: '${output.version}'`,);
         if (output.name === "Teensy MIDI") {
             teensyId = output.id;
-            console.log("teensyId", teensyId);
+            cout("Teensy MIDI connected: " + teensyId);
+            midiOutput = midi.outputs.get(teensyId)!;
         }
+    }
+
+    if (!midiOutput) {
+        cout("Could not find Teensy MIDI");
+        return;
     }
     
     setInterval(() => {
@@ -27,25 +35,23 @@ function onMIDISuccess(midiAccess: MIDIAccess)  {
         console.log(isOn);
     }, 250);
 
-    // Send initial note off
+    // Initial MIDI off
     noteOff();
 }
 
 function noteOn() {
-    isOn = true;
     const noteOnMessage = [0x90, 60, 0x7f]; // note on middle C, full velocity
-    const output = midi.outputs.get(teensyId)!;
-    output.send(noteOnMessage); //omitting the timestamp means send immediately.
+    midiOutput.send(noteOnMessage); //omitting the timestamp means send immediately.
+    isOn = true;
 }
 
 function noteOff() {
+    midiOutput.send([0x80, 60, 0x40]);
     isOn = false;
-    const output = midi.outputs.get(teensyId)!;
-    output.send([0x80, 60, 0x40]);
 }
 
 function onMIDIFailure(msg: string) {
-    console.error(`Failed to get MIDI access - ${msg}`);
+    cout(`Failed to get MIDI access to Teensy: ${msg}`);
 }
 
 export function initMidi(pinwheel: Pinwheel) {
