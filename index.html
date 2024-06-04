@@ -36,7 +36,7 @@
         <div id="instrumentSelect" class="mobile h-20 py-2 px-4 lg:px-0 flex justify-between align-middle items-center">
           <h1 id="select-inst-prompt" class="text-lg pb-2 transition">Select an instrument</h1>
           <div class="items-center px-1 py-1 border-2 border-gray-200 rounded-full enabled:hover:bg-slate-50">
-            <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:bg-slate-50 enabled:hover:cursor-pointer enabled:animate-pulse disabled:opacity-50">
+            <select id="instruments" class="rounded-full focus:outline-none transition enabled:hover:bg-slate-50 enabled:hover:cursor-pointer disabled:hover:cursor-not-allowed disabled:opacity-50">
               <option value="0">Wind</option>
               <option value="1" selected>Chimes</option>
               <option value="2">Bamboo</option>
@@ -51,8 +51,7 @@
           <!-- <canvas id="ui-canvas" width="400" height="400" class=""></canvas> -->
           <canvas id="pinwheel-canvas" width="400" height="400" class=""></canvas>
           <canvas id="input-canvas" width="400" height="400" class=""></canvas>
-          <canvas id="bg-canvas" width="400" height="400" class="transition"
-            style="background-color: #ABCDEF;"></canvas>
+          <canvas id="bg-canvas" width="400" height="400" class="transition"></canvas>
         </div>
 
         <!-- Mic Monitoring -->

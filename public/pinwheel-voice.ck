@@ -186,7 +186,7 @@ class Voice extends Chugraph
     formantBus => Formant f3(2250, .4, 50) => bus;
     // SinOsc
     SinOsc osc[NUM_VOICES] => LPF lpf => Chorus c => Gain oscBus => bus;
-    oscBus.gain(.4 * (1.0/NUM_VOICES));
+    oscBus.gain(.3 * (1.0/NUM_VOICES));
 
     // FX
     lpf.freq(Std.mtof(63+12));
@@ -287,7 +287,8 @@ public class Pinwheel
 
     // Variables
     63 => int keyCenter;
-    [0, 2, 4, 5, 7, 9, 11] @=> int major[];
+    keyCenter => Std.mtof => float keyFreq;
+    [0, 2, 4, 5, 7, 9, 11, 12] @=> int major[];
 
 
     // Set the key center
@@ -309,22 +310,23 @@ public class Pinwheel
 
     // Quantize the frequency to the nearest major scale
     fun float quantizeFreq(float freq) {
-        // Get nearest major interval
-        Std.ftom(freq) $ int => int midi;
-        midi % 12 => int wrappedMidi;
-        12 => int min;
+        freq => Std.ftom => float freqMidi;
+        // Compute octave
+        keyCenter => int octave;
+        while (!(octave <= freqMidi && octave + 12 > freqMidi)) {
+            octave < freqMidi ? octave + 12 : octave - 12 => octave;
+        }
+        // Compute major index
+        12 => float minDist; // max midi distance in an octave
         0 => int minIndex;
-        for (0 => int i; i < major.size(); i++) {
-            wrappedMidi - major[i] => int diff;
-            if (diff < min) {
-                diff => min;
+        for (0 => int i; i < major.size(); ++i) {
+            Std.fabs((octave + major[i]) - freqMidi) => float dist;
+            if (dist < minDist) {
+                dist => minDist;
                 i => minIndex;
             }
         }
-        minIndex => int majorIndex;
-        // Get octave 
-        (midi / 12) * 12 => int octave;
-        Std.mtof(octave + major[majorIndex]) => float newFreq;
-        return newFreq;
+        return Std.mtof(octave + major[minIndex]);
     }
+
 }
