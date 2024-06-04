@@ -34,11 +34,11 @@ class Drift extends Chugraph {
     float freqs[NUM_VOICES];
 
 
-    control.chan(0) => outlet;
-    control.chan(1) => outlet;
+    control.chan(0) => PingPong p => dac;
+    control.chan(1) => p;
 
     // Inititialize
-    master.gain(3.2);
+    master.gain(1);
     for (0 => int i; i < NUM_VOICES; i++) {
         osc[i].gain(1.0/(4*NUM_VOICES));
         osc2[i].gain(1.0/(NUM_VOICES));
@@ -103,7 +103,6 @@ public class Pinwheel
 {
     Drift drift;
     drift.gain(0.8);
-    drift => PingPong p => dac;
 
     // Variables
     63 => int keyCenter;
