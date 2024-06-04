@@ -2,8 +2,8 @@ import { theChuck } from "./host";
 
 const TWO_PI = Math.PI * 2;
 const MIN_VELOCITY = 0.5;
-const HIGH_SPEED_DECELERATION = 0.997;
-const LOW_SPEED_DECELERATION = 0.999;
+const HIGH_SPEED_DECELERATION = 0.993;
+const LOW_SPEED_DECELERATION = 0.997;
 
 // Scaling
 const RATIO = window.devicePixelRatio || 1;

@@ -120,6 +120,7 @@ export async function startChuck(
             },
         })
         .then((stream) => {
+            cout("Microphone Connected", "green", true);
             adc = audioContext.createMediaStreamSource(stream);
             adc.connect(micGain).connect(theChuck);
         });
@@ -182,7 +183,7 @@ function startInputMonitor() {
  */
 function setupMicGainSlider() {
     const slider = document.getElementById("mic-gain") as HTMLInputElement;
-    slider.value = "50";
+    micGain.gain.value = (2 * parseFloat(slider.value)) / 100;
     slider.oninput = () => {
         micGain.gain.value = (2 * parseFloat(slider.value)) / 100;
     };
