@@ -1,16 +1,15 @@
-// //----------------------------------------------------------
-// // title: Voice (aah)
-// // desc: Voice using granular synthesis of me saying ahh in ahh.wav
-// //       adapted from Jack Atherton's Chuck Timbre Library
-// //       view original here:
-// //       https://ccrma.stanford.edu/~lja/timbre-library/
-// //
-// // date: May 2024
-// // author: terry feng
-// //----------------------------------------------------------
+//-----------------------------------------------------------------------------
+// title: Voice (aah)
+// desc: Pitch Tracking and Formant Synthesis for a voice.
+//       Doesn't sound super realistic but is mildly interesting.
+//
+// date: May 2024
+// author: terry feng
+//-----------------------------------------------------------------------------
 
 global float MIC_FREQ;
 
+// deprecated
 //---------------------------------------------------------
 // voice - aah granular synthesis
 //---------------------------------------------------------
@@ -328,5 +327,4 @@ public class Pinwheel
         }
         return Std.mtof(octave + major[minIndex]);
     }
-
 }
