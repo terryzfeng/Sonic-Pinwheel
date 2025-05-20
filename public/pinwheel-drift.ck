@@ -76,8 +76,8 @@ class Drift extends Chugraph {
     fun void midi(int note) {
         for (0 => int i; i < NUM_VOICES; i++) {
             Std.mtof(note) => freqs[i];
+            Std.mtof(note+12) => bpf[i].freq; 
         }
-        Std.mtof(note+12) => bpf.freq; 
     }
 
     fun float midi() {
