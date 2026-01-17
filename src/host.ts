@@ -17,6 +17,7 @@ let adc: MediaStreamAudioSourceNode;
 let micGain: GainNode;
 let chuckGain: GainNode;
 let analyser: AnalyserNode;
+let selectedMicrophoneId: string = "";
 export { theChuck, chuckGain };
 
 const PIECE_LENGTH = 6; // minutes
@@ -72,6 +73,12 @@ export async function initChuck(startButton: HTMLButtonElement) {
     );
     theChuck.connect(chuckGain).connect(audioContext.destination);
 
+    // Restore saved microphone selection
+    const savedMicId = localStorage["selectedMicrophoneId"];
+    if (savedMicId) {
+        selectedMicrophoneId = savedMicId;
+    }
+
     // Microphone setup
     cout("Probing Microphones:", "green", false);
     navigator.mediaDevices.enumerateDevices().then(function (devices) {
@@ -110,15 +117,22 @@ export async function startChuck(
     startButton: HTMLButtonElement,
 ): Promise<void> {
     // Connect microphone
-    navigator.mediaDevices
-        .getUserMedia({
-            video: false,
-            audio: {
-                // echoCancellation: false,
+    const audioConstraints: MediaStreamConstraints = {
+        video: false,
+        audio: selectedMicrophoneId
+            ? {
+                deviceId: { exact: selectedMicrophoneId },
+                autoGainControl: false,
+                noiseSuppression: false,
+            }
+            : {
                 autoGainControl: false,
                 noiseSuppression: false,
             },
-        })
+    };
+
+    navigator.mediaDevices
+        .getUserMedia(audioConstraints)
         .then((stream) => {
             cout("Microphone Connected", "green", true);
             adc = audioContext.createMediaStreamSource(stream);
@@ -187,6 +201,14 @@ function setupMicGainSlider() {
     slider.oninput = () => {
         micGain.gain.value = (2 * parseFloat(slider.value)) / 100;
     };
+}
+
+/**
+ * Set the selected microphone device ID
+ */
+export function setSelectedMicrophoneId(deviceId: string) {
+    selectedMicrophoneId = deviceId;
+    localStorage["selectedMicrophoneId"] = deviceId;
 }
 
 /**

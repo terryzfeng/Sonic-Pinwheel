@@ -1,5 +1,5 @@
 import { initChuck, startChuck } from "./host";
-import { initMenu } from "./menu";
+import { initMenu, disableMicrophoneSelect } from "./menu";
 import Pinwheel from "./pinwheel";
 import Settings from "./settings";
 
@@ -37,6 +37,7 @@ class Main {
     // Start the pinwheel
     async start() {
         this.startButton.disabled = true;
+        disableMicrophoneSelect();
         await startChuck(this.startButton);
         this.pinwheel.start();
 
