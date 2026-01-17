@@ -100,7 +100,7 @@ export default class Settings {
         selectPrompt.classList.add("opacity-0");
 
         setTimeout(() => {
-            selectPrompt.innerText = "Instrument is selected";
+            selectPrompt.innerText = "Refresh to change instrument";
             selectPrompt.classList.remove("opacity-0");
             selectPrompt.classList.add("opacity-50");
         }, 300); // Wait for the hide animation to finish
