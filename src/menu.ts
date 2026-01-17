@@ -67,7 +67,9 @@ function setVolume(volume: number) {
 async function populateMicrophoneSelect() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const audioInputs = devices.filter((device) => device.kind === "audioinput");
+        const audioInputs = devices.filter(
+            (device) => device.kind === "audioinput",
+        );
 
         // Clear existing options except the first one
         while (microphoneSelect.options.length > 1) {
@@ -78,7 +80,8 @@ async function populateMicrophoneSelect() {
         audioInputs.forEach((device) => {
             const option = document.createElement("option");
             option.value = device.deviceId;
-            option.textContent = device.label || `Microphone ${device.deviceId.substring(0, 5)}`;
+            option.textContent =
+                device.label || `Microphone ${device.deviceId.substring(0, 5)}`;
             microphoneSelect.appendChild(option);
         });
 

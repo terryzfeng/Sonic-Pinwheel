@@ -121,23 +121,21 @@ export async function startChuck(
         video: false,
         audio: selectedMicrophoneId
             ? {
-                deviceId: { exact: selectedMicrophoneId },
-                autoGainControl: false,
-                noiseSuppression: false,
-            }
+                  deviceId: { exact: selectedMicrophoneId },
+                  autoGainControl: false,
+                  noiseSuppression: false,
+              }
             : {
-                autoGainControl: false,
-                noiseSuppression: false,
-            },
+                  autoGainControl: false,
+                  noiseSuppression: false,
+              },
     };
 
-    navigator.mediaDevices
-        .getUserMedia(audioConstraints)
-        .then((stream) => {
-            cout("Microphone Connected", "green", true);
-            adc = audioContext.createMediaStreamSource(stream);
-            adc.connect(micGain).connect(theChuck);
-        });
+    navigator.mediaDevices.getUserMedia(audioConstraints).then((stream) => {
+        cout("Microphone Connected", "green", true);
+        adc = audioContext.createMediaStreamSource(stream);
+        adc.connect(micGain).connect(theChuck);
+    });
     setupMicGainSlider();
     audioContext.resume();
     startButton.innerHTML = "Syncing...";

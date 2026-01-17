@@ -5,7 +5,8 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -16,15 +17,6 @@
         "@typescript-eslint"
     ],
     "rules": {
-        // make typescript switch case indentation match the rest of the code
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-
-        ],
         "linebreak-style": [
             "error",
             "unix"

@@ -60,7 +60,7 @@ export default class Visualizer {
     }
 
     drawSpectrum_(width: number, height: number) {
-        this.analyserNode.getFloatFrequencyData(this.frequencyData);
+        this.analyserNode.getFloatFrequencyData(this.frequencyData as Float32Array<ArrayBuffer>);
         const freqs = linearToLog(this.frequencyData);
         const spacing = width / (NUM_BANDS - 1);
         const bins = new Array(NUM_BANDS).fill(0);
